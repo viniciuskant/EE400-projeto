@@ -1,0 +1,41 @@
+\section{Exercícios}
+
+\subsection{Exercício 1: Exploração do Conjunto de Mandelbrot}
+
+Considerando o conjunto de Mandelbrot como descrito na introdução, seja \( M \) o
+conjunto de pontos que o compõem, \( f_c : \mathbb{C} \to \mathbb{C} \) a função geradora desses pontos, dada por \( f_c (z) = z^2 + c \), para todo
+\( c \in \mathbb{C} \), de forma que \( |f_c^n (z)| < \infty \), quando \( n \to \infty \). Em outras palavras, a órbita de \( c \) não diverge a \( \infty \). No caso de
+\( M \), temos a condição inicial \( z_0 = 0 \), ou seja, todas as órbitas partem do mesmo ponto.
+
+\begin{enumerate}[label=(\alph*)]
+    \item Explicite os primeiros termos da órbita de \( f_c \) para um \( c \) fixo. Teste se os seguintes pontos estão em \( M \): \( c_1 = -2 \), \( c_2 = -2i \), \( c_3 = 0.35 e^{i\pi/4} \).
+    
+    \textit{Resposta: }
+
+    \item Prove que \( M \) é simétrico em relação ao eixo \( x \). \\
+    \textit{Resposta: }
+
+    \item O que acontece com a órbita de um ponto que está fora de \( M \)? \\
+    \textit{Resposta: }
+
+    \item O que acontece com a órbita de um ponto que está dentro de \( M \)? \\
+    \textit{Resposta: }
+\end{enumerate}
+
+\subsection{Exercício 2: Estudando \( f_c \) e sua dinâmica}
+
+Pontos periódicos de uma função são aqueles cujos valores se repetem após um número finito de iterações, assim, existe um \( n \) (chamado de período) tal que \( f_c^n (\hat{z}) = \hat{z} \). Se \( n = 1 \), \( \hat{z} \) é chamado de ponto fixo. Observe que, para cada \( c \), os pontos periódicos de \( f_c \) serão diferentes dos pontos de sua órbita. Porém, se a órbita é convergente, existirá um subconjunto dela que converge a cada \( \hat{z} \). Nesse caso, ele é chamado de atrator e a seguinte desigualdade é válida: \( |(f_c^n)' (\hat{z})| < 1 \).
+
+\begin{enumerate}[label=(\alph*)]
+    \item A função \( f_c^n \) é holomorfa? Se sim, qual sua derivada complexa? \\
+    \textit{Resposta: }
+
+    \item Ache a região de \( M \) que contém os pontos \( c \) de forma que \( f_c \) possua um ponto fixo. Faça o mesmo para os \( c \) que fazem \( f_c \) ter um ponto de período igual a 2. Identifique essas duas regiões em um mesmo gráfico. \\
+    \textit{Resposta: }
+
+    \item Prove que um ponto \( c \) pertence a \( M \) se \( |z_n| \leq 2 \), para todo \( n = 1, 2, \ldots \). \\
+    \textit{Resposta: }
+
+    \item Prove que o intervalo de números reais puros que pertencem a \( M \) é \( [-2, 0.25] \). \\
+    \textit{Resposta: }
+\end{enumerate}

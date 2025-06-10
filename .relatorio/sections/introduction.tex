@@ -1,0 +1,39 @@
+\section{Introdução}
+O conjunto de Mandelbrot é um dos exemplos mais conhecidos de fractais. Ele é definido matematicamente como o conjunto de números complexos $c \in \mathbb{C}$ para os quais a sequência definida por:
+
+\[
+z_{n+1} = z_n^2 + c, \quad z_0 = 0
+\]
+
+permanece limitada, ou seja, não diverge para o infinito.
+
+Em termos de órbitas, cada ponto $c$ no plano complexo gera uma órbita, que é a sequência de valores $\{z_0, z_1, z_2, \dots\}$ obtida pela iteração da fórmula acima. Se a órbita permanece confinada dentro de uma região finita do plano complexo, dizemos que o ponto $c$ pertence ao conjunto de Mandelbrot. Caso contrário, se a órbita diverge para o infinito, o ponto não pertence ao conjunto.
+
+Visualmente, o conjunto de Mandelbrot é representado no plano complexo, onde cada ponto $c$ é colorido de acordo com o comportamento de sua órbita. Se a órbita não diverge, o ponto pertence ao conjunto e é geralmente colorido de preto. Caso contrário, o ponto é colorido de acordo com a rapidez com que a órbita diverge.
+
+\subsection{Representação Visual do Conjunto de Mandelbrot}
+
+Abaixo está uma representação visual do conjunto de Mandelbrot. Para gerar essa imagem, utilizamos um algoritmo que verifica se cada ponto no plano complexo pertence ao conjunto, iterando a fórmula acima e analisando o comportamento da órbita até um número máximo de iterações.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.6\linewidth]{mandelbrot.png}
+\caption{Representação visual do conjunto de Mandelbrot.}
+\label{fig:mandelbrot}
+\end{figure}
+
+\subsection{Algoritmo para Gerar o Conjunto de Mandelbrot}
+
+O algoritmo básico para gerar o conjunto de Mandelbrot pode ser descrito como:
+
+\begin{enumerate}
+    \item Para cada ponto $c$ em uma grade do plano complexo:
+    \begin{enumerate}
+        \item Inicialize $z_0 = 0$.
+        \item Itere a fórmula $z_{n+1} = z_n^2 + c$ até um número máximo de iterações ou até $|z_n| > 2$.
+        \item Se $|z_n| \leq 2$ após o número máximo de iterações, considere o ponto como pertencente ao conjunto.
+    \end{enumerate}
+    \item Atribua cores aos pontos com base no número de iterações necessárias para divergir.
+\end{enumerate}
+
+Essa abordagem permite criar imagens detalhadas e coloridas do conjunto de Mandelbrot, revelando sua estrutura fractal fascinante.

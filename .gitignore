@@ -21,13 +21,15 @@ venv/
 __pycache__/
 
 # Ignore temp latex
-.relatorio/*.aux
-.relatorio/*.fdb_latexmk 
-.relatorio/*fls
-.relatorio/*log
-.relatorio/*out
-.relatorio/*toc
-.relatorio/*xdv
-.relatorio/*ps
-.relatorio/*.dvi
-.relatorio/*.gz
+.**/*.aux
+.**/*.fdb_latexmk 
+.**/*fls
+.**/*log
+.**/*out
+.**/*toc
+.**/*xdv
+.**/*ps
+.**/*.dvi
+.**/*.gz
+.**/*.blg
+.**/*.bbl
