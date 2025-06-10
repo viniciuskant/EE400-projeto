@@ -1,0 +1,33 @@
+.vscode
+# Ignore build directory
+build/
+
+# Ignore object files
+*.o
+
+# Ignore executables
+*.out
+
+# Ignore generated files
+CMakeCache.txt
+CMakeFiles/
+Makefile
+
+# Ignore python venv
+venv/
+.venv/
+
+# Ignore python cache
+__pycache__/
+
+# Ignore temp latex
+.relatorio/*.aux
+.relatorio/*.fdb_latexmk 
+.relatorio/*fls
+.relatorio/*log
+.relatorio/*out
+.relatorio/*toc
+.relatorio/*xdv
+.relatorio/*ps
+.relatorio/*.dvi
+.relatorio/*.gz
