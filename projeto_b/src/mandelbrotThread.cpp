@@ -1,7 +1,9 @@
 #include <cinttypes>
 #include <thread>
+#include <cstdio>  
+#include <cstdlib>  
 
-#include "CycleTimer.h"
+
 
 typedef struct {
     float x0, x1;

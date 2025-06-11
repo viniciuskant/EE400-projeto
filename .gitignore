@@ -33,3 +33,6 @@ __pycache__/
 .**/*.gz
 .**/*.blg
 .**/*.bbl
+
+# imagens
+projeto_b/src/*.png
