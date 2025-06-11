@@ -6,6 +6,9 @@ build/
 *.o
 
 # Ignore executables
+*
+!*/
+!*.*
 *.out
 
 # Ignore generated files
