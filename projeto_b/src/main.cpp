@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <png.h>
+#include <unordered_set>
 
 extern void mandelbrotThread(
     int numThreads,
@@ -121,9 +122,10 @@ void writePNGImage(
 }
 
 int main(int argc, char** argv) {
-    const unsigned int width = 1600;
-    const unsigned int height = 1200;
-    const int maxIterations = 256;
+    const unsigned int scale = 10;
+    const unsigned int width = 1600 * scale;
+    const unsigned int height = 1200 * scale;
+    const int maxIterations = 512;
     int numThreads = 2;
 
     float x0 = -2;
@@ -132,6 +134,9 @@ int main(int argc, char** argv) {
     float y1 = 1;
 
     int opt;
+    int maxThreads = sysconf(_SC_NPROCESSORS_ONLN);
+    numThreads = maxThreads > 0 ? maxThreads : 2;
+
     static struct option long_options[] = {
         {"threads", 1, 0, 't'},
         {"view", 1, 0, 'v'},
