@@ -7,6 +7,8 @@
 #include <png.h>
 #include <unordered_set>
 
+
+
 extern void mandelbrotThread(
     int numThreads,
     float x0, float y0, float x1, float y1,
@@ -122,7 +124,7 @@ void writePNGImage(
 }
 
 int main(int argc, char** argv) {
-    const unsigned int scale = 10;
+    const unsigned int scale = 50;
     const unsigned int width = 1600 * scale;
     const unsigned int height = 1200 * scale;
     const int maxIterations = 512;
