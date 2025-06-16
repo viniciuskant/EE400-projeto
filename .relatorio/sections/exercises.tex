@@ -112,15 +112,89 @@ conjunto de pontos que o compõem, \( f_c : \mathbb{C} \to \mathbb{C} \) a funç
 Pontos periódicos de uma função são aqueles cujos valores se repetem após um número finito de iterações, assim, existe um \( n \) (chamado de período) tal que \( f_c^n (\hat{z}) = \hat{z} \). Se \( n = 1 \), \( \hat{z} \) é chamado de ponto fixo. Observe que, para cada \( c \), os pontos periódicos de \( f_c \) serão diferentes dos pontos de sua órbita. Porém, se a órbita é convergente, existirá um subconjunto dela que converge a cada \( \hat{z} \). Nesse caso, ele é chamado de atrator e a seguinte desigualdade é válida: \( |(f_c^n)' (\hat{z})| < 1 \).
 
 \begin{enumerate}[label=(\alph*)]
-    \item A função \( f_c^n \) é holomorfa? Se sim, qual sua derivada complexa? \\
-    \textit{Resposta: }
+    \item \textbf{A função \( f_c^n \) é holomorfa? Se sim, qual sua derivada complexa?} \\
+    
+         Sim, a função \( f_c^n \) é holomorfa para todo \( n \in \mathbb{N} \). Como \( f_c(z) = z^2 + c \) é um polinômio, ela é holomorfa em todo o plano complexo \( \mathbb{C} \). Além disso, a composição de funções holomorfas também é holomorfa, logo a função iterada \( f_c^n(z) = \underbrace{f_c \circ f_c \circ \cdots \circ f_c}_{n \text{ vezes}}(z) \) é holomorfa.
 
-    \item Ache a região de \( M \) que contém os pontos \( c \) de forma que \( f_c \) possua um ponto fixo. Faça o mesmo para os \( c \) que fazem \( f_c \) ter um ponto de período igual a 2. Identifique essas duas regiões em um mesmo gráfico. \\
-    \textit{Resposta: }
+        A derivada de \( f_c^n \) é obtida aplicando a regra da cadeia sucessivas vezes. Assim, temos:
 
-    \item Prove que um ponto \( c \) pertence a \( M \) se \( |z_n| \leq 2 \), para todo \( n = 1, 2, \ldots \). \\
-    \textit{Resposta: }
+        \[
+        (f_c^n)'(z) = f_c'(f_c^{n-1}(z)) \cdot f_c'(f_c^{n-2}(z)) \cdots f_c'(z) = \prod_{k=0}^{n-1} f_c'(f_c^k(z))
+        \]
 
-    \item Prove que o intervalo de números reais puros que pertencem a \( M \) é \( [-2, 0.25] \). \\
-    \textit{Resposta: }
+        Como \( f_c(z) = z^2 + c \), sua derivada é \( f_c'(z) = 2z \). Substituindo:
+
+        \[
+        (f_c^n)'(z) = \prod_{k=0}^{n-1} 2 f_c^k(z) = 2^n \cdot \prod_{k=0}^{n-1} f_c^k(z)
+        \]
+
+        Portanto, \( f_c^n \) é holomorfa e sua derivada é dada pelo produto acima.
+
+
+    \item \textcolor{red}{Ache a região de \( M \) que contém os pontos \( c \) de forma que \( f_c \) possua um ponto fixo. Faça o mesmo para os \( c \) que fazem \( f_c \) ter um ponto de período igual a 2. Identifique essas duas regiões em um mesmo gráfico. \\
+        \textit{Resposta: }}
+
+    \item \textbf{Prove que um ponto \( c \) pertence a \( M \) se \( |z_n| \leq 2 \), para todo \( n = 1, 2, \ldots \). }\\
+
+        Suponha, por contraposição, que \( |z_n| > 2 \) para algum \( n \geq 1 \). Vamos mostrar que, nesse caso, a sequência \( \{z_n\} \) diverge, ou seja, \( |z_n| \to \infty \) quando \( n \to \infty \).
+
+        Sabemos que \( f_c(z) = z^2 + c \). Assim, para \( |z_n| > 2 \), temos:
+
+        \[
+        |z_{n+1}| = |f_c(z_n)| = |z_n^2 + c| \geq |z_n|^2 - |c|.
+        \]
+
+        Como \( |z_n| > 2 \), temos \( |z_n|^2 > 4 \). Além disso, \( |c| \) é finito, então:
+
+        \[
+        |z_{n+1}| > |z_n|^2 - |c| > 4 - |c|.
+        \]
+
+        Portanto, \( |z_{n+1}| > |z_n| \) para \( |z_n| > 2 \), o que implica que a sequência \( \{|z_n|\} \) é estritamente crescente para \( |z_n| > 2 \). Como \( |z_n| \) cresce indefinidamente, concluímos que \( |z_n| \to \infty \) quando \( n \to \infty \).
+
+        Por contraposição, se \( |z_n| \leq 2 \) para todo \( n \geq 1 \), então a sequência \( \{z_n\} \) não diverge, ou seja, \( c \in M \).
+
+
+    \item \textbf{Prove que o intervalo de números reais puros que pertencem a \( M \) é \( [-2, 0.25] \). }\\
+    
+        Para provar que o intervalo de números reais puros que pertencem a \( M \) é \( [-2, 0.25] \), iremos fazer o limite de \( n \) indo a \( \infty \) e analisar o comportamento da função \( f_c(z) = z^2 + c \).
+
+        Para isso, consideramos a condição de que o módulo da derivada da função iterada deve ser menor que 1 para garantir que a órbita permaneça limitada:
+
+        \[
+        \lim_{n \to \infty} \left| \frac{z_{n+1}}{z_n} \right| < 1
+        \]
+
+        \[
+        \lim_{n \to \infty} \left| \frac{{z_n}^2 + c}{z_n} \right| < 1
+        \]
+
+        \[
+        \lim_{n \to \infty} \left| {z_n}^2 + c \right| < \lim_{n \to \infty} \left| z_n \right| 
+        \]
+
+        \[
+        \lim_{n \to \infty} \left| {z_n}^2  -z_n + c \right| < 0
+        \]
+
+        Como \( z_n \) tende a \( \infty \), podemos analisar o comportamento da função quadrática \( {z_n}^2 - z_n + c \). Para que essa função tenha raízes reais, o discriminante deve ser não negativo:
+
+        \[
+        \Delta = (-1)^2 - 4 \cdot 1 \cdot
+        c = 1 - 4c \geq 0
+        \]
+        Resolvendo a desigualdade:
+        \[
+        1 - 4c \geq 0 \implies c \leq 0.25
+        \]
+
+
+        Pelo resultado do item anterior, sabemos que \( c \) deve ser maior ou igual a \( -2 \) para que a órbita não diverja. Assim, temos:
+
+        \[
+        -2 \leq c \leq 0.25
+        \]
+
+
+
 \end{enumerate}
