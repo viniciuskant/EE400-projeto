@@ -1,4 +1,4 @@
-\section{Exercícios}
+x\section{Exercícios}
 
 \subsection{Exercício 1: Exploração do Conjunto de Mandelbrot}
 
@@ -8,18 +8,103 @@ conjunto de pontos que o compõem, \( f_c : \mathbb{C} \to \mathbb{C} \) a funç
 \( M \), temos a condição inicial \( z_0 = 0 \), ou seja, todas as órbitas partem do mesmo ponto.
 
 \begin{enumerate}[label=(\alph*)]
-    \item Explicite os primeiros termos da órbita de \( f_c \) para um \( c \) fixo. Teste se os seguintes pontos estão em \( M \): \( c_1 = -2 \), \( c_2 = -2i \), \( c_3 = 0.35 e^{i\pi/4} \).
+    \item \textbf{Explicite os primeiros termos da órbita de \( f_c \) para um \( c \) fixo. Teste se os seguintes pontos estão em \( M \): \( c_1 = -2 \), \( c_2 = -2i \), \( c_3 = 0.35 e^{i\pi/4} \).}
     
-    \textit{Resposta: }
+        Para \( c_1 = -2 \), temos \( z_0 = -2 \), \( z_1 = 2 \), \( z_2 = 2 \), \( z_3 = 2 \), \( z_4 = 2 \), \( z_5 = 2 \), \( z_6 = 2 \), \( z_7 = 2 \), \( z_8 = 2 \) e \( z_9 = 2 \). Conclusão: A órbita não diverge, mas não está em \( M \) pois não satisfaz a condição de convergência.
 
-    \item Prove que \( M \) é simétrico em relação ao eixo \( x \). \\
-    \textit{Resposta: }
+        Para \( c_2 = -2i \), temos \( z_0 = -2i \) e \( z_1 = -4 - 2i \). Conclusão: A órbita diverge para \( \infty \). \( c_2 \notin M \).
 
-    \item O que acontece com a órbita de um ponto que está fora de \( M \)? \\
-    \textit{Resposta: }
+        Para \( c_3 = 0.35 e^{i\pi/4} \) (aproximado como \( c_3 = 0.247487 + 0.247487i \)), temos \( z_0 = 0.247487 + 0.247487i \), \( z_1 = 0.247487 + 0.369987i \), \( z_2 = 0.171847 + 0.430622i \), \( z_3 = 0.091584 + 0.395489i \), \( z_4 = 0.099463 + 0.319928i \), \( z_5 = 0.155026 + 0.311129i \), \( z_6 = 0.174719 + 0.343954i \), \( z_7 = 0.159710 + 0.367678i \), \( z_8 = 0.137808 + 0.364931i \) e \( z_9 = 0.133304 + 0.348068i \). Conclusão: A órbita não diverge e parece convergir. \( c_3 \in M \).
 
-    \item O que acontece com a órbita de um ponto que está dentro de \( M \)? \\
-    \textit{Resposta: }
+    
+
+    \item \textbf{Prove que \( M \) é simétrico em relação ao eixo \( x \).} \\
+
+        Para provar que \( M \) é simétrico em relação ao eixo \( x \), considere um ponto \( c \in \mathbb{C} \) tal que \( c = a + bi \), onde \( a, b \in \mathbb{R} \). O conjugado complexo de \( c \) é dado por \( \overline{c} = a - bi \).
+
+        Queremos provar, por indução matemática, que para toda \( n \in \mathbb{N} \),
+
+        \[
+        \overline{z_n} = w_n,
+        \]
+
+        onde:
+
+        \[
+        \begin{cases}
+        z_0 = 0 \\
+        z_{n+1} = f_c(z_n) = z_n^2 + c
+        \end{cases}
+        \quad \text{e} \quad
+        \begin{cases}
+        w_0 = 0 \\
+        w_{n+1} = f_{\overline{c}}(w_n) = w_n^2 + \overline{c}.
+        \end{cases}
+        \]
+
+        \textbf{Base da indução:} Para \( n = 0 \),
+
+        \[
+        \overline{z_0} = \overline{0} = 0 = w_0.
+        \]
+
+        Portanto, a propriedade vale para \( n = 0 \).
+
+        \textbf{Hipótese:} Suponha que para algum \( n \geq 0 \),
+
+        \[
+        \overline{z_n} = w_n.
+        \]
+
+        \textbf{Passo:} Vamos mostrar que então
+
+        \[
+        \overline{z_{n+1}} = w_{n+1}.
+        \]
+
+        Calculando \( z_{n+1} \):
+
+        \[
+        z_{n+1} = f_c(z_n) = z_n^2 + c.
+        \]
+
+        Tomando o conjugado:
+
+        \[
+        \overline{z_{n+1}} = \overline{z_n^2 + c} = \overline{z_n}^2 + \overline{c}.
+        \]
+
+        Pela hipótese de indução, \( \overline{z_n} = w_n \), então:
+
+        \[
+        \overline{z_{n+1}} = w_n^2 + \overline{c} = f_{\overline{c}}(w_n) = w_{n+1}.
+        \]
+
+        \textbf{Conclusão:} Por indução matemática, a propriedade vale para todo \( n \in \mathbb{N} \):
+
+        \[
+        \overline{z_n} = w_n \quad \forall n \in \mathbb{N}.
+        \]
+
+        \bigskip
+
+        \textbf{Implicação geométrica:} Isso significa que a sequência de iterações de \( f_c \), partindo de \( 0 \), tem comportamento simétrico em relação ao eixo real (eixo \( x \)) quando comparamos \( c \) e \( \overline{c} \).
+
+    \item \textbf{O que acontece com a órbita de um ponto que está fora de \( M \)?} \\
+    
+        Se um ponto está fora de \( M \), sua órbita diverge para \( \infty \). Isso ocorre porque, por definição, os pontos em \( M \) são aqueles cujas órbitas permanecem limitadas. Para pontos fora de \( M \), a sequência \( \{z_n\} \) gerada por \( f_c \) cresce indefinidamente em magnitude, ou seja, \( |z_n| \to \infty \) quando \( n \to \infty \). Geometricamente, isso significa que esses pontos não pertencem ao conjunto de Mandelbrot.
+
+    \item \textbf{O que acontece com a órbita de um ponto que está dentro de \( M \)?} \\
+
+        Se um ponto está dentro de \( M \), sua órbita não diverge para \( \infty \). Em vez disso, ela permanece limitada e pode exibir diferentes comportamentos dinâmicos, dependendo do ponto \( c \):
+
+        \begin{itemize}
+            \item \textbf{Convergência a um ponto fixo ou periódico:} A órbita pode convergir para um ponto fixo ou para um ciclo periódico. Nesse caso, o ponto fixo ou o ciclo periódico é chamado de atrator.
+            \item \textbf{Comportamento caótico:} Em algumas regiões de \( M \), a órbita pode exibir comportamento caótico, sem convergir para um ponto fixo ou ciclo periódico, mas ainda assim permanecendo limitada.
+        \end{itemize}
+
+        Geometricamente, isso significa que os pontos dentro de \( M \) estão associados a dinâmicas estáveis ou limitadas da função \( f_c \).
+
 \end{enumerate}
 
 \subsection{Exercício 2: Estudando \( f_c \) e sua dinâmica}
