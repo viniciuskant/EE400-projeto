@@ -1,14 +1,22 @@
+% !TeX root = main.tex
+
 \documentclass{article}
 
 \usepackage[brazil]{babel}
 
-\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage[letterpaper,top=1cm,bottom=1cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
 
 \usepackage{mathtools}
 \usepackage{amsfonts}
 \usepackage{graphicx}
 \usepackage{enumitem}
-\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{listings}
+\usepackage{amsmath}
+
+\usepackage{caption}
+\usepackage{subfig}
+\usepackage{float}
+\usepackage[colorlinks=true, allcolors=black]{hyperref}
 
 \title{Projeto B: Conjunto de Mandelbrot}
 
@@ -28,14 +36,13 @@
 \hypersetup{linkcolor=blue}
 \newpage
 
-% \begin{abstract}
-% Resumo do projeto e do que foi feito.
-% \end{abstract}
 
+\newpage
 
 \input{sections/introduction}
 \input{sections/exercises}
 \input{sections/project}
+\input{sections/consideracoes}
 
 \bibliographystyle{ieeetr}
 \bibliography{bibliografia}
