@@ -6,7 +6,7 @@ build/
 *.o
 
 # imagens de saida
-projeto_b/data/
+projeto_b/data/*
 
 # Ignore executables
 *
