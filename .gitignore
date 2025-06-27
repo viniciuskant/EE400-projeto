@@ -4,20 +4,14 @@
 # Ignore build and binary output
 build/
 bin/
-projeto_b/build/
-projeto_b/bin/
+projeto_b/build/*
+projeto_b/bin/*
 
 # Ignore object and executable files
 *.o
 *.out
 *.exe
 *.elf
-
-# Ignore all executables (optional, but use with care)
-# *          ← isso ignora tudo!
-# !*/        ← exceto diretórios
-# !*.*       ← exceto arquivos com extensão
-# Essas 3 linhas são perigosas; podem ser removidas para evitar conflitos
 
 # Ignore projeto_b/data/ and all contents
 projeto_b/data/

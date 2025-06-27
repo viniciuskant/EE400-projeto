@@ -6,8 +6,8 @@
 
 
 typedef struct {
-    float x0, x1;
-    float y0, y1;
+    long double x0, x1;
+    long double y0, y1;
     unsigned int width;
     unsigned int height;
     int maxIterations;
@@ -19,7 +19,7 @@ typedef struct {
 
 
 extern void mandelbrotSerial(
-    float x0, float y0, float x1, float y1,
+    long double x0, long double y0, long double x1, long double y1,
     int width, int height,
     int startRow, int numRows,
     int maxIterations,
@@ -27,7 +27,8 @@ extern void mandelbrotSerial(
 
 void workerThreadStart(WorkerArgs * const args) {
     mandelbrotSerial(
-        args->x0, args->y0, args->x1, args->y1,
+        static_cast<long double>(args->x0), static_cast<long double>(args->y0), 
+        static_cast<long double>(args->x1), static_cast<long double>(args->y1),
         args->width, args->height,
         args->startRow, 
         args->numRows,
@@ -38,7 +39,7 @@ void workerThreadStart(WorkerArgs * const args) {
 
 void mandelbrotThread(
     int numThreads,
-    float x0, float y0, float x1, float y1,
+    long double x0, long double y0, long double x1, long double y1,
     int width, int height,
     int maxIterations, int output[])
 {

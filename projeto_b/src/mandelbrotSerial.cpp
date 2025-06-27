@@ -38,28 +38,25 @@
 */
 
 
-static inline int mandel(float c_re, float c_im, int count)
+static inline int mandel(long double c_re, long double c_im, int count)
 {
-    float z_re = c_re, z_im = c_im;
-    // float prev_mag_sq = z_re * z_re + z_im * z_im;
-    int i;
-    for (i = 0; i < count; ++i) {
+  long double z_re = c_re, z_im = c_im;
+  int i;
+  for (i = 0; i < count; ++i) {
 
-        float mag_sq = z_re * z_re + z_im * z_im;
+    long double mag_sq = z_re * z_re + z_im * z_im;
 
-        // Condição de escape padrão (se sair da bolha de raio 2)
-        if (mag_sq > 4.f)
-            break;
+    if (mag_sq > 4.0L)
+      break;
 
-        float new_re = z_re * z_re - z_im * z_im;
-        float new_im = 2.f * z_re * z_im;
-        z_re = c_re + new_re;
-        z_im = c_im + new_im;
+    long double new_re = z_re * z_re - z_im * z_im;
+    long double new_im = 2.0L * z_re * z_im;
+    z_re = c_re + new_re;
+    z_im = c_im + new_im;
 
-        // prev_mag_sq = mag_sq;
-    }
+  }
 
-    return i;
+  return i;
 }
 
 
@@ -75,25 +72,25 @@ static inline int mandel(float c_re, float c_im, int count)
 // * width, height describe the size of the output image
 // * startRow, totalRows describe how much of the image to compute
 void mandelbrotSerial(
-    float x0, float y0, float x1, float y1,
-    int width, int height,
-    int startRow, int totalRows,
-    int maxIterations,
-    int output[])
+  long double x0, long double y0, long double x1, long double y1,
+  int width, int height,
+  int startRow, int totalRows,
+  int maxIterations,
+  int output[])
 {
-    float dx = (x1 - x0) / width;
-    float dy = (y1 - y0) / height;
+  long double dx = (x1 - x0) / width;
+  long double dy = (y1 - y0) / height;
 
-    int endRow = startRow + totalRows;
+  int endRow = startRow + totalRows;
 
-    for (int j = startRow; j < endRow; j++) {
-        for (int i = 0; i < width; ++i) {
-            float x = x0 + i * dx;
-            float y = y0 + j * dy;
+  for (int j = startRow; j < endRow; j++) {
+    for (int i = 0; i < width; ++i) {
+      long double x = x0 + i * dx;
+      long double y = y0 + j * dy;
 
-            int index = (j * width + i);
-            output[index] = mandel(x, y, maxIterations);
-        }
+      int index = (j * width + i);
+      output[index] = mandel(x, y, maxIterations);
     }
+  }
 }
 

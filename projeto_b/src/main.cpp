@@ -5,7 +5,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "writePNG.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -14,17 +13,69 @@
 #include <chrono>
 #include <omp.h>
 
+#include "lodepng.h"
+
+void writePNGImage(int* buffer, unsigned int width, unsigned int height, const char* filename, int maxIterations) {
+    std::vector<unsigned char> image(width * height * 4);
+
+    #pragma omp parallel for collapse(2)
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
+            int value = buffer[y * width + x];
+            float normalized = static_cast<float>(value) / maxIterations;
+
+            // Map normalized value to a high-detail color gradient
+            unsigned char r, g, b;
+            if (normalized < 0.16f) {
+                r = 0;
+                g = 0;
+                b = static_cast<unsigned char>(normalized * 6.25f * 255);
+            } else if (normalized < 0.33f) {
+                r = 255;
+                g = static_cast<unsigned char>((normalized - 0.16f) * 6.25f * 255);
+                b = 0;
+            } else if (normalized < 0.5f) {
+                r = static_cast<unsigned char>((1.0f - (normalized - 0.33f) * 6.25f) * 255);
+                g = 255;
+                b = static_cast<unsigned char>((normalized - 0.33f) * 6.25f * 255);
+            } else if (normalized < 0.66f) {
+                r = 0;
+                g = static_cast<unsigned char>((1.0f - (normalized - 0.5f) * 6.25f) * 255);
+                b = 255;
+            } else if (normalized < 0.83f) {
+                r = static_cast<unsigned char>((normalized - 0.66f) * 6.25f * 255);
+                g = 0;
+                b = 255;
+            } else {
+                r = 255;
+                g = static_cast<unsigned char>((normalized - 0.83f) * 6.25f * 255);
+                b = static_cast<unsigned char>((1.0f - (normalized - 0.83f) * 6.25f) * 255);
+            }
+
+            unsigned int index = 4 * (y * width + x);
+            image[index + 0] = r; // Red
+            image[index + 1] = g; // Green
+            image[index + 2] = b; // Blue
+            image[index + 3] = 255; // Alpha
+        }
+    }
+
+    unsigned error = lodepng::encode(filename, image, width, height);
+    if (error) {
+        fprintf(stderr, "Error encoding PNG: %s\n", lodepng_error_text(error));
+    }
+}
 
 extern void mandelbrotThread(
     int numThreads,
-    float x0, float y0, float x1, float y1,
+    long double x0, long double y0, long double x1, long double y1,
     int width, int height,
     int maxIterations,
     int output[]);
 
-void scaleAndShift(float& x0, float& x1, float& y0, float& y1,
-                   float scale,
-                   float shiftX, float shiftY) {
+void scaleAndShift(long double& x0, long double& x1, long double& y0, long double& y1,
+                   long double scale,
+                   long double shiftX, long double shiftY) {
     x0 *= scale;
     x1 *= scale;
     y0 *= scale;
@@ -69,16 +120,19 @@ void questao_1a() {
 }
 
 int main(int argc, char** argv) { 
-    const unsigned int scale = 2;
-    const unsigned int width = 7680 * scale;
+    const unsigned int scale = 1;
+    const unsigned int width = 7200 * scale;
     const unsigned int height = 4320 * scale;
     const int maxIterations = 500;
-    int numThreads = 8;
+    int numThreads = sysconf(_SC_NPROCESSORS_ONLN);
+    if (numThreads <= 0) {
+        numThreads = 4;
+    }
 
-    float x0 = -2;
-    float x1 = 1;
-    float y0 = -1;
-    float y1 = 1;
+    long double x0 = -2;
+    long double x1 = 1;
+    long double y0 = -1;
+    long double y1 = 1;
 
     int opt;
     int maxThreads = sysconf(_SC_NPROCESSORS_ONLN);
@@ -90,6 +144,8 @@ int main(int argc, char** argv) {
         {"help", no_argument, 0, '?'},
         {0, 0, 0, 0}
     };
+
+    printf("Using %d threads\n", numThreads);
 
     while ((opt = getopt_long(argc, argv, "t:v:?", long_options, NULL)) != -1) {
         switch (opt) {
@@ -121,15 +177,17 @@ int main(int argc, char** argv) {
         }
     }
 
+    auto mainStart = std::chrono::high_resolution_clock::now();
+
     questao_1a();
 
     int* output_thread = new int[width * height];
 
-    double minThread = 1e30;
+    auto start = std::chrono::high_resolution_clock::now();
+
     for (int i = 0; i < 5; ++i) {
         memset(output_thread, 0, width * height * sizeof(int));
 
-        auto start = std::chrono::high_resolution_clock::now();
 
         // Devido ao item b do exercício 1, que provo a simetria do conjunto de Mandelbrot, faço essa otimização
         // Ajusta mandelbrotThread para calcular apenas metade dos pontos e usar simetria
@@ -142,29 +200,29 @@ int main(int argc, char** argv) {
                 output_thread[(height - 1 - y) * width + x] = output_thread[y * width + x];
             }
         }
-
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed = end - start;
-        double timeInSeconds = elapsed.count();
-
-        if (timeInSeconds < minThread) {
-            minThread = timeInSeconds;
-        }
     }
 
-    if (minThread < 1) {
-        printf("[mandelbrot thread]:\t\t[%.3f] ms\n", minThread * 1000);
-    } else if (minThread < 60) {
-        printf("[mandelbrot thread]:\t\t[%.3f] s\n", minThread);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> totalElapsed = end - start;
+    double totalTimeInSeconds = totalElapsed.count();
+
+    if (totalTimeInSeconds < 1) {
+        printf("[mandelbrot thread]:\t[%.3f] ms\n", totalTimeInSeconds * 1000);
+    } else if (totalTimeInSeconds < 60) {
+        printf("[mandelbrot thread]:\t[%.3f] s\n", totalTimeInSeconds);
     } else {
-        int minutes = static_cast<int>(minThread / 60);
-        double seconds = minThread - minutes * 60;
-        printf("[mandelbrot thread]:\t\t[%d min %.3f s]\n", minutes, seconds);
+        int minutes = static_cast<int>(totalTimeInSeconds / 60);
+        double seconds = totalTimeInSeconds - minutes * 60;
+        printf("[mandelbrot thread total]:\t[%d min %.3f s]\n", minutes, seconds);
     }
 
     writePNGImage(output_thread, width, height, "../data/mandelbrot-thread.png", maxIterations);
 
     delete[] output_thread;
+
+    auto mainEnd = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> mainElapsed = mainEnd - mainStart;
+    printf("Total execution time of main: %.3f seconds\n", mainElapsed.count());
 
     return 0;
 }

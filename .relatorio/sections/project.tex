@@ -68,6 +68,8 @@ Para ilustrar o impacto do número de iterações no nível de detalhe das image
 
 As áreas pretas nas imagens geradas representam os pontos que não pertencem ao conjunto de Mandelbrot. Essas regiões indicam os valores no plano complexo onde a sequência iterativa diverge, ou seja, cresce sem limites após um grande número de iterações. Essa característica é fundamental para identificar as fronteiras complexas e os padrões intrincados que definem o conjunto.
 
+Com um número reduzido de iterações, pontos que não pertencem ao conjunto podem ser erroneamente classificados como pertencentes. Isso ocorre porque o número insuficiente de iterações impede a detecção da divergência desses pontos, levando à falsa conclusão de que eles não escapam para o infinito. Isso pode ser falcimente observado na imagem de 50 interações da \autoref{fig:comparison_iterations} por meio da diferença de cores, já que pontos mais distantes, com módulo bem maior que 2, ja divergem, porém pontos próximos a 2 ainda não divergiram (vermelho mais escuro).
+
 \subsection{Intervalo do Plano Complexo}
 
 O plano complexo foi definido com os seguintes limites:
@@ -86,7 +88,6 @@ O núcleo do cálculo do conjunto de Mandelbrot é implementado na função \tex
 static inline int mandel(float c_re, float c_im, int count)
 {
     float z_re = c_re, z_im = c_im;
-    float prev_mag_sq = z_re * z_re + z_im * z_im;
     int i;
     for (i = 0; i < count; ++i) {
 
@@ -100,7 +101,6 @@ static inline int mandel(float c_re, float c_im, int count)
         z_re = c_re + new_re;
         z_im = c_im + new_im;
 
-        prev_mag_sq = mag_sq;
     }
 
     return i;
