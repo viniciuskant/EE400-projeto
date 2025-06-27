@@ -38,9 +38,9 @@
 */
 
 
-static inline int mandel(long double c_re, long double c_im, int count)
+static inline int mandel(long double c_re, long double c_im, int count, long double z0_re = 0.0L, long double z0_im = 0.0L)
 {
-  long double z_re = c_re, z_im = c_im;
+  long double z_re = z0_re, z_im = z0_im; // Initialize z with z0
   int i;
   for (i = 0; i < count; ++i) {
 
@@ -73,6 +73,7 @@ static inline int mandel(long double c_re, long double c_im, int count)
 // * startRow, totalRows describe how much of the image to compute
 void mandelbrotSerial(
   long double x0, long double y0, long double x1, long double y1,
+  long double z0_re, long double z0_im,
   int width, int height,
   int startRow, int totalRows,
   int maxIterations,
@@ -83,13 +84,13 @@ void mandelbrotSerial(
 
   int endRow = startRow + totalRows;
 
-  for (int j = startRow; j < endRow; j++) {
+  for (int j = startRow; j < endRow; ++j) {
     for (int i = 0; i < width; ++i) {
       long double x = x0 + i * dx;
       long double y = y0 + j * dy;
 
-      int index = (j * width + i);
-      output[index] = mandel(x, y, maxIterations);
+      int index = j * width + i;
+      output[index] = mandel(x, y, maxIterations, z0_re, z0_im);
     }
   }
 }

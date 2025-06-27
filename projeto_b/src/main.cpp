@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <chrono>
 #include <omp.h>
-
 #include "lodepng.h"
 
 void writePNGImage(int* buffer, unsigned int width, unsigned int height, const char* filename, int maxIterations) {
@@ -69,6 +68,7 @@ void writePNGImage(int* buffer, unsigned int width, unsigned int height, const c
 extern void mandelbrotThread(
     int numThreads,
     long double x0, long double y0, long double x1, long double y1,
+    long double z0_re, long double z0_im,
     int width, int height,
     int maxIterations,
     int output[]);
@@ -185,13 +185,16 @@ int main(int argc, char** argv) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
+      long double z0_re =0 ,  z0_im = 0;
+
+
     for (int i = 0; i < 5; ++i) {
         memset(output_thread, 0, width * height * sizeof(int));
 
 
         // Devido ao item b do exercício 1, que provo a simetria do conjunto de Mandelbrot, faço essa otimização
         // Ajusta mandelbrotThread para calcular apenas metade dos pontos e usar simetria
-        mandelbrotThread(numThreads, x0, y0, x1, 0, width, height / 2, maxIterations, output_thread);
+        mandelbrotThread(numThreads, x0, y0, x1, 0, z0_re, z0_im, width, height / 2, maxIterations, output_thread);
 
         // Copia a metade superior para a metade inferior usando simetria
         #pragma omp parallel for num_threads(numThreads) collapse(2)
