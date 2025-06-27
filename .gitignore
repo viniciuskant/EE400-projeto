@@ -5,6 +5,9 @@ build/
 # Ignore object files
 *.o
 
+# imagens de saida
+projeto_b/data/
+
 # Ignore executables
 *
 !*/
