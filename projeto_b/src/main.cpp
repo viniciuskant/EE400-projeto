@@ -6,6 +6,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "writePNG.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <getopt.h>
+#include <unistd.h>
+#include <chrono>
+#include <omp.h>
 
 
 extern void mandelbrotThread(
@@ -61,13 +68,12 @@ void questao_1a() {
     printOrbit(c3_re, c3_im, 10); // c3 = 0.35 * e^(iπ/4)
 }
 
-
-int main(int argc, char** argv) {
-    const unsigned int scale = 100;
-    const unsigned int width = 1600 * scale;
-    const unsigned int height = 1200 * scale;
-    const int maxIterations = 512;
-    int numThreads = 2;
+int main(int argc, char** argv) { 
+    const unsigned int scale = 2;
+    const unsigned int width = 7680 * scale;
+    const unsigned int height = 4320 * scale;
+    const int maxIterations = 500;
+    int numThreads = 8;
 
     float x0 = -2;
     float x1 = 1;
@@ -79,13 +85,13 @@ int main(int argc, char** argv) {
     numThreads = maxThreads > 0 ? maxThreads : 2;
 
     static struct option long_options[] = {
-        {"threads", 1, 0, 't'},
-        {"view", 1, 0, 'v'},
-        {"help", 0, 0, '?'},
+        {"threads", required_argument, 0, 't'},
+        {"view", required_argument, 0, 'v'},
+        {"help", no_argument, 0, '?'},
         {0, 0, 0, 0}
     };
 
-    while ((opt = getopt_long(argc, argv, "t:v:?", long_options, NULL)) != EOF) {
+    while ((opt = getopt_long(argc, argv, "t:v:?", long_options, NULL)) != -1) {
         switch (opt) {
         case 't': {
             numThreads = atoi(optarg);
@@ -122,10 +128,40 @@ int main(int argc, char** argv) {
     double minThread = 1e30;
     for (int i = 0; i < 5; ++i) {
         memset(output_thread, 0, width * height * sizeof(int));
-        mandelbrotThread(numThreads, x0, y0, x1, y1, width, height, maxIterations, output_thread);
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        // Devido ao item b do exercício 1, que provo a simetria do conjunto de Mandelbrot, faço essa otimização
+        // Ajusta mandelbrotThread para calcular apenas metade dos pontos e usar simetria
+        mandelbrotThread(numThreads, x0, y0, x1, 0, width, height / 2, maxIterations, output_thread);
+
+        // Copia a metade superior para a metade inferior usando simetria
+        #pragma omp parallel for num_threads(numThreads) collapse(2)
+        for (unsigned int y = 0; y < height / 2; ++y) {
+            for (unsigned int x = 0; x < width; ++x) {
+                output_thread[(height - 1 - y) * width + x] = output_thread[y * width + x];
+            }
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
+        double timeInSeconds = elapsed.count();
+
+        if (timeInSeconds < minThread) {
+            minThread = timeInSeconds;
+        }
     }
 
-    printf("[mandelbrot thread]:\t\t[%.3f] ms\n", minThread * 1000);
+    if (minThread < 1) {
+        printf("[mandelbrot thread]:\t\t[%.3f] ms\n", minThread * 1000);
+    } else if (minThread < 60) {
+        printf("[mandelbrot thread]:\t\t[%.3f] s\n", minThread);
+    } else {
+        int minutes = static_cast<int>(minThread / 60);
+        double seconds = minThread - minutes * 60;
+        printf("[mandelbrot thread]:\t\t[%d min %.3f s]\n", minutes, seconds);
+    }
+
     writePNGImage(output_thread, width, height, "../data/mandelbrot-thread.png", maxIterations);
 
     delete[] output_thread;
