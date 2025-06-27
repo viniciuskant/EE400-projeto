@@ -1,44 +1,53 @@
-.vscode
-# Ignore build directory
+# Ignore VSCode config
+.vscode/
+
+# Ignore build and binary output
 build/
+bin/
+projeto_b/build/
+projeto_b/bin/
 
-# Ignore object files
+# Ignore object and executable files
 *.o
-
-# imagens de saida
-projeto_b/data/*
-
-# Ignore executables
-*
-!*/
-!*.*
 *.out
+*.exe
+*.elf
 
-# Ignore generated files
+# Ignore all executables (optional, but use with care)
+# *          ← isso ignora tudo!
+# !*/        ← exceto diretórios
+# !*.*       ← exceto arquivos com extensão
+# Essas 3 linhas são perigosas; podem ser removidas para evitar conflitos
+
+# Ignore projeto_b/data/ and all contents
+projeto_b/data/
+
+# Ignore imagem de saída geradas em src
+projeto_b/src/*.png
+
+# Ignore CMake files
 CMakeCache.txt
 CMakeFiles/
 Makefile
 
-# Ignore python venv
+# Ignore Python virtual environments
 venv/
 .venv/
 
-# Ignore python cache
+# Ignore Python bytecode
 __pycache__/
 
-# Ignore temp latex
-.**/*.aux
-.**/*.fdb_latexmk 
-.**/*fls
-.**/*log
-.**/*out
-.**/*toc
-.**/*xdv
-.**/*ps
-.**/*.dvi
-.**/*.gz
-.**/*.blg
-.**/*.bbl
+# Ignore LaTeX build files
+*.aux
+*.fdb_latexmk 
+*.fls
+*.log
+*.out
+*.toc
+*.xdv
+*.ps
+*.dvi
+*.gz
+*.blg
+*.bbl
 
-# imagens
-projeto_b/src/*.png
