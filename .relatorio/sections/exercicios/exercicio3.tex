@@ -1,0 +1,30 @@
+
+
+
+\subsection*{Exercício 3: Construção e Exploração do Conjunto de Mandelbrot}
+
+
+\begin{enumerate}[label=(\alph*)]
+    \item \textbf{Impacto do raio de convergência e número de iterações no processamento, detalhamento e precisão da imagem:} \\
+    
+        Ao alterar o raio de convergência e o número de iterações no código, observamos os seguintes efeitos:
+        \begin{itemize}
+            \item \textbf{Velocidade de processamento:} Um maior número de iterações aumenta o tempo de processamento, pois mais cálculos são realizados para cada ponto.
+            \item \textbf{Detalhamento:} Um maior número de iterações permite identificar detalhes mais finos do conjunto, especialmente nas bordas.
+            \item \textbf{Precisão:} Um raio de convergência maior pode incluir pontos que divergem lentamente, reduzindo a precisão. Por outro lado, um raio muito pequeno pode excluir pontos que pertencem ao conjunto.
+        \end{itemize}
+        Testes foram realizados com diferentes valores de raio e iterações, e as diferenças foram analisadas graficamente.
+
+    \item \textbf{Geração de outros fractais alterando a condição inicial \( z_0 \):} \\
+    
+        Alterando a condição inicial \( z_0 = 0 \) para outros valores, foram gerados exemplos de fractais relacionados ao conjunto de Mandelbrot. Esses fractais pertencem à família dos conjuntos de Julia. As imagens obtidas mostram como a escolha de \( z_0 \) influencia a forma e a estrutura do fractal.
+
+    \item \textbf{Estudo das órbitas variando \( z_0 \) para um \( c \) fixo:} \\
+    
+        Fixando um valor de \( c \) e variando \( z_0 \), foram estudadas as órbitas para identificar os valores de \( z_0 \) cuja função \( f_c^n(z_0) \) não diverge quando \( n \to \infty \). Os fractais gerados dessa forma também pertencem à família dos conjuntos de Julia. Exemplos gráficos foram plotados para diferentes valores de \( c \).
+
+    \item \textbf{Alteração do grau do polinômio \( f_c \):} \\
+    
+        Substituindo o grau \( d \) na função \( f_c(z) = z^d + c \) por outros números positivos, foram gerados fractais conhecidos como conjuntos de Multibrot. Observou-se que o aumento do grau \( d \) altera significativamente a forma do fractal. Valores negativos de \( d \) não foram testados, pois requerem algoritmos diferentes.
+\end{enumerate}
+
