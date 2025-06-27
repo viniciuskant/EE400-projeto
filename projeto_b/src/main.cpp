@@ -124,6 +124,7 @@ int main(int argc, char** argv) {
     const unsigned int width = 7200 * scale;
     const unsigned int height = 4320 * scale;
     const int maxIterations = 500;
+
     int numThreads = sysconf(_SC_NPROCESSORS_ONLN);
     if (numThreads <= 0) {
         numThreads = 4;
@@ -134,6 +135,9 @@ int main(int argc, char** argv) {
     long double y0 = -1;
     long double y1 = 1;
 
+    long double z0_re =0 ,  z0_im = 0;
+
+
     int opt;
     int maxThreads = sysconf(_SC_NPROCESSORS_ONLN);
     numThreads = maxThreads > 0 ? maxThreads : 2;
@@ -141,13 +145,14 @@ int main(int argc, char** argv) {
     static struct option long_options[] = {
         {"threads", required_argument, 0, 't'},
         {"view", required_argument, 0, 'v'},
+        {"z0", required_argument, 0, 'z'},
         {"help", no_argument, 0, '?'},
         {0, 0, 0, 0}
     };
 
     printf("Using %d threads\n", numThreads);
 
-    while ((opt = getopt_long(argc, argv, "t:v:?", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "t:v:z:?", long_options, NULL)) != -1) {
         switch (opt) {
         case 't': {
             numThreads = atoi(optarg);
@@ -170,6 +175,13 @@ int main(int argc, char** argv) {
             }
             break;
         }
+        case 'z': {
+            if (sscanf(optarg, "%Lf,%Lf", &z0_re, &z0_im) != 2) {
+                fprintf(stderr, "Invalid format for z0. Use --z0 <real,imaginary>\n");
+                return 1;
+            }
+            break;
+        }
         case '?':
         default:
             usage(argv[0]);
@@ -185,8 +197,13 @@ int main(int argc, char** argv) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-      long double z0_re =0 ,  z0_im = 0;
 
+    printf("Configuration:\n");
+    printf("  Threads: %d\n", numThreads);
+    printf("  Resolution: %ux%u\n", width, height);
+    printf("  Max Iterations: %d\n", maxIterations);
+    printf("  Viewport: x0 = %Lf, x1 = %Lf, y0 = %Lf, y1 = %Lf\n", x0, x1, y0, y1);
+    printf("  Initial z0: (%Lf, %Lf)\n", z0_re, z0_im);
 
     for (int i = 0; i < 5; ++i) {
         memset(output_thread, 0, width * height * sizeof(int));
