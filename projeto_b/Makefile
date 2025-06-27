@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -O3 -Wall -std=c++11 -lpng
+CXXFLAGS = -O3 -Wall -std=c++11 -lpng -fopenmp 
 
 SRC_DIR = src
 BUILD_DIR = build
