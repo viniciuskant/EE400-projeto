@@ -38,27 +38,42 @@
 */
 
 
-static inline int mandel(long double c_re, long double c_im, int count, long double z0_re = 0.0L, long double z0_im = 0.0L)
+
+
+#include <cmath>
+
+static inline int mandel(long double c_re, long double c_im, int count, long double z0_re = 0.0L, long double z0_im = 0.0L, int e = 7)
 {
-  long double z_re = z0_re, z_im = z0_im; // Initialize z with z0
-  int i;
-  for (i = 0; i < count; ++i) {
+    long double z_re = z0_re;
+    long double z_im = z0_im;
+    int i;
 
-    long double mag_sq = z_re * z_re + z_im * z_im;
+    for (i = 0; i < count; ++i) {
+        long double r2 = z_re * z_re + z_im * z_im;
 
-    if (mag_sq > 4.0L)
-      break;
+        if (r2 > 4.0L)
+            break;
 
-    long double new_re = z_re * z_re - z_im * z_im;
-    long double new_im = 2.0L * z_re * z_im;
-    z_re = c_re + new_re;
-    z_im = c_im + new_im;
+        if (e == 2) {
+            // Otimização para o caso comum d=2
+            long double new_re = z_re * z_re - z_im * z_im;
+            long double new_im = 2.0L * z_re * z_im;
+            z_re = c_re + new_re;
+            z_im = c_im + new_im;
+        } else {
+            // Forma polar: z = r * e^(iθ) => z^d = r^d * e^(i d θ)
+            long double r = std::sqrt(r2);
+            long double theta = std::atan2(z_im, z_re);
+            long double r_d = std::pow(r, e);
+            long double new_re = r_d * std::cos(e * theta);
+            long double new_im = r_d * std::sin(e * theta);
+            z_re = c_re + new_re;
+            z_im = c_im + new_im;
+        }
+    }
 
-  }
-
-  return i;
+    return i;
 }
-
 
 //
 // MandelbrotSerial --
@@ -74,6 +89,7 @@ static inline int mandel(long double c_re, long double c_im, int count, long dou
 void mandelbrotSerial(
   long double x0, long double y0, long double x1, long double y1,
   long double z0_re, long double z0_im,
+  int e,
   int width, int height,
   int startRow, int totalRows,
   int maxIterations,
@@ -90,7 +106,7 @@ void mandelbrotSerial(
       long double y = y0 + j * dy;
 
       int index = j * width + i;
-      output[index] = mandel(x, y, maxIterations, z0_re, z0_im);
+      output[index] = mandel(x, y, maxIterations, z0_re, z0_im, e);
     }
   }
 }

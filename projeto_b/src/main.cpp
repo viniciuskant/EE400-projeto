@@ -1,6 +1,5 @@
 #include <math.h>
 #include <stdio.h>
-#include <algorithm>
 #include <getopt.h>
 #include <string.h>
 #include <unistd.h>
@@ -10,6 +9,8 @@
 #include <cstring>
 #include <getopt.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <chrono>
 #include <omp.h>
 #include "lodepng.h"
@@ -69,6 +70,7 @@ extern void mandelbrotThread(
     int numThreads,
     long double x0, long double y0, long double x1, long double y1,
     long double z0_re, long double z0_im,
+    int e,
     int width, int height,
     int maxIterations,
     int output[]);
@@ -89,9 +91,12 @@ void scaleAndShift(long double& x0, long double& x1, long double& y0, long doubl
 void usage(const char* progname) {
     printf("Usage: %s [options]\n", progname);
     printf("Program Options:\n");
-    printf("  -t  --threads <N>  Use N threads\n");
-    printf("  -v  --view <INT>   Use specified view settings\n");
-    printf("  -?  --help         This message\n");
+    printf("  -t, --threads <N>         Use N threads\n");
+    printf("  -v, --view <INT>          Use specified view settings\n");
+    printf("  -m, --max-iterations <N>  Set the maximum number of iterations\n");
+    printf("  -z, --z0 <real,imaginary> Set the initial value of z0\n");
+    printf("  -e, --exponent <N>        Set the exponent value\n");
+    printf("  -?, --help                Display this help message\n");
 }
 
 void questao_1a() {
@@ -120,20 +125,21 @@ void questao_1a() {
 }
 
 int main(int argc, char** argv) { 
-    const unsigned int scale = 1;
-    const unsigned int width = 7200 * scale;
-    const unsigned int height = 4320 * scale;
-    const int maxIterations = 500;
+    long double x0 = -2;
+    long double x1 = 1.5;
+    long double y0 = -1.5;
+    long double y1 = 1.5;
+    const unsigned int scale = 2;
+    const unsigned int width = static_cast<unsigned int>((x1 - x0) * 1000 * scale);
+    const unsigned int height = static_cast<unsigned int>((y1 - y0) * 1000 * scale);
+    int maxIterations = 750;
+    int exponent = 2;
 
     int numThreads = sysconf(_SC_NPROCESSORS_ONLN);
     if (numThreads <= 0) {
         numThreads = 4;
     }
 
-    long double x0 = -2;
-    long double x1 = 1;
-    long double y0 = -1;
-    long double y1 = 1;
 
     long double z0_re =0 ,  z0_im = 0;
 
@@ -146,6 +152,8 @@ int main(int argc, char** argv) {
         {"threads", required_argument, 0, 't'},
         {"view", required_argument, 0, 'v'},
         {"z0", required_argument, 0, 'z'},
+        {"maxIterations", required_argument, 0, 'm'},
+        {"exponent", required_argument, 0, 'e'},
         {"help", no_argument, 0, '?'},
         {0, 0, 0, 0}
     };
@@ -175,6 +183,23 @@ int main(int argc, char** argv) {
             }
             break;
         }
+        case 'm': {
+            maxIterations = atoi(optarg);
+            if (maxIterations <= 0) {
+            fprintf(stderr, "Max iterations must be greater than 0\n");
+            return 1;
+            }
+            break;
+        }
+        case 'e': {
+            exponent = atoi(optarg);
+            if (exponent <= 0) {
+            fprintf(stderr, "Exponent must be greater than 0\n");
+            return 1;
+            }
+            printf("Exponent set to: %d\n", exponent);
+            break;
+        }
         case 'z': {
             if (sscanf(optarg, "%Lf,%Lf", &z0_re, &z0_im) != 2) {
                 fprintf(stderr, "Invalid format for z0. Use --z0 <real,imaginary>\n");
@@ -191,7 +216,7 @@ int main(int argc, char** argv) {
 
     auto mainStart = std::chrono::high_resolution_clock::now();
 
-    questao_1a();
+    // questao_1a();
 
     int* output_thread = new int[width * height];
 
@@ -204,21 +229,17 @@ int main(int argc, char** argv) {
     printf("  Max Iterations: %d\n", maxIterations);
     printf("  Viewport: x0 = %Lf, x1 = %Lf, y0 = %Lf, y1 = %Lf\n", x0, x1, y0, y1);
     printf("  Initial z0: (%Lf, %Lf)\n", z0_re, z0_im);
+    printf("  Exponent: %d\n", exponent);
 
-    for (int i = 0; i < 5; ++i) {
-        memset(output_thread, 0, width * height * sizeof(int));
+    // Devido ao item b do exercício 1, que provo a simetria do conjunto de Mandelbrot, faço essa otimização
+    // Ajusta mandelbrotThread para calcular apenas metade dos pontos e usar simetria
+    mandelbrotThread(numThreads, x0, y0, x1, 0, z0_re, z0_im, exponent, width, height / 2, maxIterations, output_thread);
 
-
-        // Devido ao item b do exercício 1, que provo a simetria do conjunto de Mandelbrot, faço essa otimização
-        // Ajusta mandelbrotThread para calcular apenas metade dos pontos e usar simetria
-        mandelbrotThread(numThreads, x0, y0, x1, 0, z0_re, z0_im, width, height / 2, maxIterations, output_thread);
-
-        // Copia a metade superior para a metade inferior usando simetria
-        #pragma omp parallel for num_threads(numThreads) collapse(2)
-        for (unsigned int y = 0; y < height / 2; ++y) {
-            for (unsigned int x = 0; x < width; ++x) {
-                output_thread[(height - 1 - y) * width + x] = output_thread[y * width + x];
-            }
+    // Copia a metade superior para a metade inferior usando simetria
+    #pragma omp parallel for num_threads(numThreads) collapse(2)
+    for (unsigned int y = 0; y < height / 2; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
+            output_thread[(height - 1 - y) * width + x] = output_thread[y * width + x];
         }
     }
 
@@ -236,7 +257,37 @@ int main(int argc, char** argv) {
         printf("[mandelbrot thread total]:\t[%d min %.3f s]\n", minutes, seconds);
     }
 
-    writePNGImage(output_thread, width, height, "../data/mandelbrot-thread.png", maxIterations);
+    // Determine the directory to save the image
+    const char* directory = nullptr;
+    if (access("data", F_OK) == 0) {
+        directory = "data";
+    } else if (access("../data", F_OK) == 0) {
+        directory = "../data";
+    } else {
+        fprintf(stderr, "Error: Could not find a valid directory to save the image.\n");
+        delete[] output_thread;
+        return 1;
+    }
+
+    // Create a directory for the current exponent if it doesn't exist
+    char exponentDir[256];
+    snprintf(exponentDir, sizeof(exponentDir), "%s/exponent-%d", directory, exponent);
+    if (access(exponentDir, F_OK) != 0) {
+        if (mkdir(exponentDir, 0755) != 0) {
+            fprintf(stderr, "Error: Could not create directory %s\n", exponentDir);
+            delete[] output_thread;
+            return 1;
+        }
+    }
+
+    // Construct the filename with iteration count and z0 information
+    char filename[512];
+    snprintf(filename, sizeof(filename), "%s/mandelbrot-%d-iterations-z0(%Lf,%Lf).png", 
+             exponentDir, maxIterations, z0_re, z0_im);
+
+    // Save the image
+    writePNGImage(output_thread, width, height, filename, maxIterations);
+    printf("Image saved to: %s\n", filename);
 
     delete[] output_thread;
 
