@@ -193,10 +193,10 @@ int main(int argc, char** argv) {
         }
         case 'e': {
             exponent = atoi(optarg);
-            if (exponent <= 0) {
-            fprintf(stderr, "Exponent must be greater than 0\n");
-            return 1;
-            }
+            // if (exponent <= 0) {
+            //     fprintf(stderr, "Exponent must be greater than 0\n");
+            //     return 1;
+            // }
             printf("Exponent set to: %d\n", exponent);
             break;
         }
@@ -233,14 +233,21 @@ int main(int argc, char** argv) {
 
     // Devido ao item b do exercício 1, que provo a simetria do conjunto de Mandelbrot, faço essa otimização
     // Ajusta mandelbrotThread para calcular apenas metade dos pontos e usar simetria
-    mandelbrotThread(numThreads, x0, y0, x1, 0, z0_re, z0_im, exponent, width, height / 2, maxIterations, output_thread);
+    
+    if (z0_im == 0){
 
-    // Copia a metade superior para a metade inferior usando simetria
-    #pragma omp parallel for num_threads(numThreads) collapse(2)
-    for (unsigned int y = 0; y < height / 2; ++y) {
-        for (unsigned int x = 0; x < width; ++x) {
-            output_thread[(height - 1 - y) * width + x] = output_thread[y * width + x];
+        mandelbrotThread(numThreads, x0, y0, x1, 0, z0_re, z0_im, exponent, width, height / 2, maxIterations, output_thread);
+        
+        // Copia a metade superior para a metade inferior usando simetria
+        #pragma omp parallel for num_threads(numThreads) collapse(2)
+        for (unsigned int y = 0; y < height / 2; ++y) {
+            for (unsigned int x = 0; x < width; ++x) {
+                output_thread[(height - 1 - y) * width + x] = output_thread[y * width + x];
+            }
         }
+    } else{
+        mandelbrotThread(numThreads, x0, y0, x1, y1, z0_re, z0_im, exponent, width, height, maxIterations, output_thread);
+
     }
 
     auto end = std::chrono::high_resolution_clock::now();
