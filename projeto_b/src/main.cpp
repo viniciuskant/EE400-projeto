@@ -75,6 +75,14 @@ extern void mandelbrotThread(
     int maxIterations,
     int output[]);
 
+extern void juliaThread(
+    int numThreads,
+    long double x0, long double y0, long double x1, long double y1,
+    long double c_re, long double c_im,
+    int e,
+    int width, int height,
+    int maxIterations, int output[]);
+
 void scaleAndShift(long double& x0, long double& x1, long double& y0, long double& y1,
                    long double scale,
                    long double shiftX, long double shiftY) {
@@ -91,12 +99,16 @@ void scaleAndShift(long double& x0, long double& x1, long double& y0, long doubl
 void usage(const char* progname) {
     printf("Usage: %s [options]\n", progname);
     printf("Program Options:\n");
-    printf("  -t, --threads <N>         Use N threads\n");
-    printf("  -v, --view <INT>          Use specified view settings\n");
-    printf("  -m, --max-iterations <N>  Set the maximum number of iterations\n");
-    printf("  -z, --z0 <real,imaginary> Set the initial value of z0\n");
-    printf("  -e, --exponent <N>        Set the exponent value\n");
-    printf("  -?, --help                Display this help message\n");
+    printf("  -t, --threads <N>         Specify the number of threads to use (default: system's max threads)\n");
+    printf("  -v, --view <INT>          Select a predefined view (1: default, 2: zoomed-in view)\n");
+    printf("  -m, --max-iterations <N>  Set the maximum number of iterations for the fractal computation (default: 750)\n");
+    printf("  -z, --z0 <real,imaginary> Specify the initial complex value z0 (default: 0,0)\n");
+    printf("  -e, --exponent <N>        Set the exponent value for the fractal computation (default: 2)\n");
+    printf("  -j, --julia               Enable Julia set mode (requires --z0 <real,imaginary> for fixed Julia value)\n");
+    printf("  -?, --help                Display this help message and exit\n");
+    printf("\nExamples:\n");
+    printf("  %s -t 4 -v 2 -m 1000 -z 0.355,0.355 -e 3\n", progname);
+    printf("  %s --threads 8 --view 1 --max-iterations 500\n", progname);
 }
 
 void questao_1a() {
@@ -124,183 +136,239 @@ void questao_1a() {
     printOrbit(c3_re, c3_im, 10); // c3 = 0.35 * e^(iπ/4)
 }
 
-int main(int argc, char** argv) { 
-    long double x0 = -2;
-    long double x1 = 1.5;
-    long double y0 = -1.5;
-    long double y1 = 1.5;
-    const unsigned int scale = 2;
-    const unsigned int width = static_cast<unsigned int>((x1 - x0) * 1000 * scale);
-    const unsigned int height = static_cast<unsigned int>((y1 - y0) * 1000 * scale);
-    int maxIterations = 750;
-    int exponent = 2;
+int main(int argc, char** argv) {
+    // Default configuration values
+    struct Config {
+        long double x0 = -2.0;
+        long double x1 = 1.5;
+        long double y0 = -1.5;
+        long double y1 = 1.5;
+        long double j_re = 0.0;
+        long double j_im = 0.0;
+        long double z0_re = 0.0;
+        long double z0_im = 0.0;
+        bool juliaMode = false;
+        unsigned int scale = 1;
+        int maxIterations = 750;
+        int exponent = 2;
+        int numThreads = sysconf(_SC_NPROCESSORS_ONLN);
+    } config;
 
-    int numThreads = sysconf(_SC_NPROCESSORS_ONLN);
-    if (numThreads <= 0) {
-        numThreads = 4;
+    // Calculate dimensions based on configuration
+    const unsigned int width = static_cast<unsigned int>((config.x1 - config.x0) * 1000 * config.scale);
+    const unsigned int height = static_cast<unsigned int>((config.y1 - config.y0) * 1000 * config.scale);
+
+    // Validate thread count
+    if (config.numThreads <= 0) {
+        config.numThreads = 4;
     }
 
-
-    long double z0_re =0 ,  z0_im = 0;
-
-
-    int opt;
-    int maxThreads = sysconf(_SC_NPROCESSORS_ONLN);
-    numThreads = maxThreads > 0 ? maxThreads : 2;
-
+    // Command line options
     static struct option long_options[] = {
         {"threads", required_argument, 0, 't'},
         {"view", required_argument, 0, 'v'},
         {"z0", required_argument, 0, 'z'},
         {"maxIterations", required_argument, 0, 'm'},
         {"exponent", required_argument, 0, 'e'},
+        {"julia", required_argument, 0, 'j'},
         {"help", no_argument, 0, '?'},
         {0, 0, 0, 0}
     };
 
-    printf("Using %d threads\n", numThreads);
-
-    while ((opt = getopt_long(argc, argv, "t:v:z:?", long_options, NULL)) != -1) {
+    // Parse command line arguments
+    int opt;
+    while ((opt = getopt_long(argc, argv, "t:v:z:m:e:j?", long_options, NULL)) != -1) {
         switch (opt) {
-        case 't': {
-            numThreads = atoi(optarg);
-            if (numThreads <= 0) {
-                fprintf(stderr, "Number of threads must be greater than 0\n");
+            case 't':
+                config.numThreads = atoi(optarg);
+                if (config.numThreads <= 0) {
+                    fprintf(stderr, "Number of threads must be greater than 0\n");
+                    return 1;
+                }
+                break;
+                
+            case 'v': {
+                int viewIndex = atoi(optarg);
+                if (viewIndex == 2) {
+                    scaleAndShift(config.x0, config.x1, config.y0, config.y1, 0.015f, -0.986f, 0.30f);
+                } else if (viewIndex > 1) {
+                    fprintf(stderr, "Invalid view index\n");
+                    return 1;
+                }
+                break;
+            }
+                
+            case 'm':
+                config.maxIterations = atoi(optarg);
+                if (config.maxIterations <= 0) {
+                    fprintf(stderr, "Max iterations must be greater than 0\n");
+                    return 1;
+                }
+                break;
+                
+            case 'e':
+                config.exponent = atoi(optarg);
+                printf("Exponent set to: %d\n", config.exponent);
+                break;
+                
+            case 'j': {
+                config.juliaMode = true;
+                const char* julia_params = optarg;
+                
+                // Debug adicional
+                for (int i = 0; i < argc; i++) {
+                    printf("argv[%d] = %s\n", i, argv[i]);
+                }
+                
+                // Se optarg é NULL, tenta pegar o próximo argumento
+                if (julia_params == NULL && optind < argc) {
+                    julia_params = argv[optind];
+                    // Verifica se não é outra opção
+                    if (julia_params[0] == '-') {
+                        julia_params = NULL;
+                    } else {
+                        optind++;
+                    }
+                }
+                
+                if (julia_params == NULL) {
+                    fprintf(stderr, "Error: Missing Julia parameters after -j\n");
+                    return 1;
+                }
+                
+                
+                if (sscanf(julia_params, "%Lf,%Lf", &config.j_re, &config.j_im) != 2) {
+                    fprintf(stderr, "Error: Invalid Julia parameters format. Expected 'real,imaginary'\n");
+                    fprintf(stderr, "Example: -j 0.285,0.01\n");
+                    return 1;
+                }
+                
+                printf("Julia set enabled with c = (%Lf, %Lf)\n", config.j_re, config.j_im);
+                break;
+            }
+                
+            case 'z':
+                if (sscanf(optarg, "%Lf,%Lf", &config.z0_re, &config.z0_im) != 2) {
+                    fprintf(stderr, "Invalid format for z0. Use --z0 <real,imaginary>\n");
+                    return 1;
+                }
+                break;
+                
+            case '?':
+            default:
+                usage(argv[0]);
                 return 1;
-            }
-            break;
-        }
-        case 'v': {
-            int viewIndex = atoi(optarg);
-            if (viewIndex == 2) {
-                float scaleValue = .015f;
-                float shiftX = -.986f;
-                float shiftY = .30f;
-                scaleAndShift(x0, x1, y0, y1, scaleValue, shiftX, shiftY);
-            } else if (viewIndex > 1) {
-                fprintf(stderr, "Invalid view index\n");
-                return 1;
-            }
-            break;
-        }
-        case 'm': {
-            maxIterations = atoi(optarg);
-            if (maxIterations <= 0) {
-            fprintf(stderr, "Max iterations must be greater than 0\n");
-            return 1;
-            }
-            break;
-        }
-        case 'e': {
-            exponent = atoi(optarg);
-            // if (exponent <= 0) {
-            //     fprintf(stderr, "Exponent must be greater than 0\n");
-            //     return 1;
-            // }
-            printf("Exponent set to: %d\n", exponent);
-            break;
-        }
-        case 'z': {
-            if (sscanf(optarg, "%Lf,%Lf", &z0_re, &z0_im) != 2) {
-                fprintf(stderr, "Invalid format for z0. Use --z0 <real,imaginary>\n");
-                return 1;
-            }
-            break;
-        }
-        case '?':
-        default:
-            usage(argv[0]);
-            return 1;
         }
     }
 
-    auto mainStart = std::chrono::high_resolution_clock::now();
-
-    // questao_1a();
-
-    int* output_thread = new int[width * height];
-
-    auto start = std::chrono::high_resolution_clock::now();
-
-
+    // Print configuration
+    printf("Using %d threads\n", config.numThreads);
     printf("Configuration:\n");
-    printf("  Threads: %d\n", numThreads);
+    printf("  Threads: %d\n", config.numThreads);
     printf("  Resolution: %ux%u\n", width, height);
-    printf("  Max Iterations: %d\n", maxIterations);
-    printf("  Viewport: x0 = %Lf, x1 = %Lf, y0 = %Lf, y1 = %Lf\n", x0, x1, y0, y1);
-    printf("  Initial z0: (%Lf, %Lf)\n", z0_re, z0_im);
-    printf("  Exponent: %d\n", exponent);
+    printf("  Max Iterations: %d\n", config.maxIterations);
+    printf("  Viewport: x0 = %Lf, x1 = %Lf, y0 = %Lf, y1 = %Lf\n", 
+           config.x0, config.x1, config.y0, config.y1);
+    printf("  Initial z0: (%Lf, %Lf)\n", config.z0_re, config.z0_im);
+    printf("  Exponent: %d\n", config.exponent);
 
-    // Devido ao item b do exercício 1, que provo a simetria do conjunto de Mandelbrot, faço essa otimização
-    // Ajusta mandelbrotThread para calcular apenas metade dos pontos e usar simetria
-    
-    if (z0_im == 0){
+    // Start timing
+    auto mainStart = std::chrono::high_resolution_clock::now();
+    auto computationStart = std::chrono::high_resolution_clock::now();
 
-        mandelbrotThread(numThreads, x0, y0, x1, 0, z0_re, z0_im, exponent, width, height / 2, maxIterations, output_thread);
-        
-        // Copia a metade superior para a metade inferior usando simetria
-        #pragma omp parallel for num_threads(numThreads) collapse(2)
-        for (unsigned int y = 0; y < height / 2; ++y) {
-            for (unsigned int x = 0; x < width; ++x) {
-                output_thread[(height - 1 - y) * width + x] = output_thread[y * width + x];
+    // Allocate output buffer
+    int* output = new int[width * height];
+
+    // Compute fractal
+    if (!config.juliaMode) {
+        // Optimize for symmetric case
+        if (config.z0_im == 0) {
+            mandelbrotThread(config.numThreads, config.x0, config.y0, config.x1, 0, 
+                             config.z0_re, config.z0_im, config.exponent, width, 
+                             height / 2, config.maxIterations, output);
+            
+            // Mirror the upper half to the lower half
+            #pragma omp parallel for num_threads(config.numThreads) collapse(2)
+            for (unsigned int y = 0; y < height / 2; ++y) {
+                for (unsigned int x = 0; x < width; ++x) {
+                    output[(height - 1 - y) * width + x] = output[y * width + x];
+                }
             }
+        } else {
+            mandelbrotThread(config.numThreads, config.x0, config.y0, config.x1, config.y1,
+                             config.z0_re, config.z0_im, config.exponent, width, 
+                             height, config.maxIterations, output);
         }
-    } else{
-        mandelbrotThread(numThreads, x0, y0, x1, y1, z0_re, z0_im, exponent, width, height, maxIterations, output_thread);
-
-    }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> totalElapsed = end - start;
-    double totalTimeInSeconds = totalElapsed.count();
-
-    if (totalTimeInSeconds < 1) {
-        printf("[mandelbrot thread]:\t[%.3f] ms\n", totalTimeInSeconds * 1000);
-    } else if (totalTimeInSeconds < 60) {
-        printf("[mandelbrot thread]:\t[%.3f] s\n", totalTimeInSeconds);
     } else {
-        int minutes = static_cast<int>(totalTimeInSeconds / 60);
-        double seconds = totalTimeInSeconds - minutes * 60;
-        printf("[mandelbrot thread total]:\t[%d min %.3f s]\n", minutes, seconds);
+        juliaThread(config.numThreads, config.x0, config.y0, config.x1, config.y1,
+                config.j_re, config.j_im, config.exponent, width,
+                height, config.maxIterations, output);
     }
 
-    // Determine the directory to save the image
-    const char* directory = nullptr;
+    // End timing and print results
+    auto computationEnd = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> computationTime = computationEnd - computationStart;
+    
+    if (computationTime.count() < 1) {
+        printf("[Computation time]:\t[%.3f] ms\n", computationTime.count() * 1000);
+    } else if (computationTime.count() < 60) {
+        printf("[Computation time]:\t[%.3f] s\n", computationTime.count());
+    } else {
+        int minutes = static_cast<int>(computationTime.count() / 60);
+        double seconds = computationTime.count() - minutes * 60;
+        printf("[Computation time]:\t[%d min %.3f s]\n", minutes, seconds);
+    }
+
+    // Determine output directory
+    const char* baseDir = nullptr;
     if (access("data", F_OK) == 0) {
-        directory = "data";
+        baseDir = "data";
     } else if (access("../data", F_OK) == 0) {
-        directory = "../data";
+        baseDir = "../data";
     } else {
-        fprintf(stderr, "Error: Could not find a valid directory to save the image.\n");
-        delete[] output_thread;
+        fprintf(stderr, "Error: Could not find output directory\n");
+        delete[] output;
         return 1;
     }
 
-    // Create a directory for the current exponent if it doesn't exist
-    char exponentDir[256];
-    snprintf(exponentDir, sizeof(exponentDir), "%s/exponent-%d", directory, exponent);
-    if (access(exponentDir, F_OK) != 0) {
-        if (mkdir(exponentDir, 0755) != 0) {
-            fprintf(stderr, "Error: Could not create directory %s\n", exponentDir);
-            delete[] output_thread;
-            return 1;
-        }
+    // Create appropriate subdirectories
+    const char* fractalType = config.juliaMode ? "julia" : "mandelbrot";
+    char fractalDir[256], exponentDir[1024];
+    
+    snprintf(fractalDir, sizeof(fractalDir), "%s/%s", baseDir, fractalType);
+    if (access(fractalDir, F_OK) != 0 && mkdir(fractalDir, 0755) != 0) {
+        fprintf(stderr, "Error creating directory %s\n", fractalDir);
+        delete[] output;
+        return 1;
     }
 
-    // Construct the filename with iteration count and z0 information
-    char filename[512];
-    snprintf(filename, sizeof(filename), "%s/mandelbrot-%d-iterations-z0(%Lf,%Lf).png", 
-             exponentDir, maxIterations, z0_re, z0_im);
+    snprintf(exponentDir, sizeof(exponentDir), "%s/exponent-%d", fractalDir, config.exponent);
+    if (access(exponentDir, F_OK) != 0 && mkdir(exponentDir, 0755) != 0) {
+        fprintf(stderr, "Error creating directory %s\n", exponentDir);
+        delete[] output;
+        return 1;
+    }
 
-    // Save the image
-    writePNGImage(output_thread, width, height, filename, maxIterations);
+    // Save image
+    char filename[2048];
+    if (config.juliaMode) {
+        snprintf(filename, sizeof(filename), "%s/julia-%d-iterations-c(%Lf,%Lf).png", 
+                 exponentDir, config.maxIterations, config.j_re, config.j_im);
+    } else {
+        snprintf(filename, sizeof(filename), "%s/mandelbrot-%d-iterations-z0(%Lf,%Lf).png", 
+                 exponentDir, config.maxIterations, config.z0_re, config.z0_im);
+    }
+    
+    writePNGImage(output, width, height, filename, config.maxIterations);
     printf("Image saved to: %s\n", filename);
 
-    delete[] output_thread;
+    // Clean up
+    delete[] output;
 
+    // Print total execution time
     auto mainEnd = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> mainElapsed = mainEnd - mainStart;
-    printf("Total execution time of main: %.3f seconds\n", mainElapsed.count());
+    std::chrono::duration<double> totalTime = mainEnd - mainStart;
+    printf("Total execution time: %.3f seconds\n", totalTime.count());
 
     return 0;
 }
