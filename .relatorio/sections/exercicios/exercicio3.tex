@@ -103,13 +103,40 @@
     Uma análise interessante é que, à medida que o valor de \(|z_0|\) aumenta, o conjunto de Mandelbrot aparenta diminuir em tamanho (redução da área de cor rosa na figura). Isso possivelmente ocorre devido à maior probabilidade de os valores iterados escaparem para o infinito, reduzindo a região de convergência.   
     
     
-      \item[(c)] Pode-se também alterar a forma de observar a dinâmica: ao invés de fixar a condição inicial $z_0$, escolha um valor
-      fixo para $c$ e estude as órbitas variando os valores de $z_0$, escolhendo aqueles para os quais a função $f_c^n(z_0)$
-      não diverge quando $n \to \infty$. Plote alguns exemplos desse novo fractal. Os fractais gerados nessa questão e na anterior são exemplos dos conhecidos conjuntos de Julia.
+\item[(c)] Pode-se também alterar a forma de observar a dinâmica: ao invés de fixar a condição inicial $z_0$, escolha um valor fixo para $c$ e estude as órbitas variando os valores de $z_0$, escolhendo aqueles para os quais a função $f_c^n(z_0)$ não diverge quando $n \to \infty$. Plote alguns exemplos desse novo fractal. Os fractais gerados nessa questão e na anterior são exemplos dos conhecidos conjuntos de Julia.
 
-  \item[(d)] Uma terceira forma de alterar $M$ é mudando o grau do polinômio $f_c$, substituindo $d$ na função
-  $f_c(z) = z^d + c$ por outros números positivos. Veja o que acontece com a figura ao usar diferentes valores.
-  Esses conjuntos são conhecidos como \emph{Multibrot}. Experimente também valores negativos de $d$.
+\begin{figure}[H]
+        \centering
+        \subfloat[$c = (0.355, 0.337)$]{
+                \includegraphics[width=0.3\textwidth]{figures/julia/julia-1000-iterations-c(0.355000,0.337000).png}
+        }
+        \subfloat[$c = (0.370, -0.100)$]{
+                \includegraphics[width=0.3\textwidth]{figures/julia/julia-1000-iterations-c(0.370000,-0.100000).png}
+        }
+        \subfloat[$c = (-0.800, 0.156)$]{
+                \includegraphics[width=0.3\textwidth]{figures/julia/julia-1000-iterations-c(-0.800000,0.156000).png}
+        }
+        \caption{Conjuntos de Julia para diferentes valores de $c$ utilizando o expoente $d = 2$. Cada subfigura apresenta o conjunto gerado para o respectivo valor de $c$.}
+\end{figure}
+
+\begin{figure}[H]
+        \centering
+        \subfloat[$c = (0.450, 0.1428)$, expoente $d = -1$]{
+                \includegraphics[width=0.3\textwidth]{figures/julia/julia-125-iterations-c(0.450000,0.142800)-e--1.png}
+        }
+        \subfloat[$c = (0.500, 0.500)$, expoente $d = 3$]{       
+                \includegraphics[width=0.3\textwidth]{figures/julia/julia-125-iterations-c(0.500000,0.500000)-e-3.png}
+        }
+        \subfloat[$c = (0.500, 0.500)$, expoente $d = 7$]{
+                \includegraphics[width=0.3\textwidth]{figures/julia/julia-125-iterations-c(0.500000,0.500000)-e-7.png}
+        }
+        \caption{Conjuntos de Julia para diferentes valores de $c$ e expoentes.}
+\end{figure}
+
+
+Para todos os exemplos apresentados, foram utilizadas 125 iterações, e os valores iniciais estão indicados nas legendas das figuras correspondentes. Essa uniformidade nos parâmetros permite uma análise comparativa mais clara entre as diferentes variações dos conjuntos de Mandelbrot, Julia e Multibrot, destacando como as alterações nos valores de $z_0$, $c$ e $d$ influenciam as formas e os padrões gerados.
+
+\item[(d)] Uma terceira forma de alterar $M$ é mudando o grau do polinômio $f_c$, substituindo $d$ na função $f_c(z) = z^d + c$ por outros números positivos. Veja o que acontece com a figura ao usar diferentes valores. Esses conjuntos são conhecidos como \emph{Multibrot}. Experimente também valores negativos de $d$.
 
 
 \begin{figure}[H]
