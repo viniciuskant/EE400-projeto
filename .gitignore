@@ -19,6 +19,12 @@ projeto_b/data/
 # Ignore imagem de saída geradas em src
 projeto_b/src/*.png
 
+# Ignore all result directories in projeto_b
+projeto_b/resultados_combinados/
+projeto_b/resultados_exponent/
+projeto_b/resultados_maxIter/
+projeto_b/resultados_z0/
+
 # Ignore CMake files
 CMakeCache.txt
 CMakeFiles/
