@@ -74,6 +74,7 @@ extern void mandelbrotThread(
     long double x0, long double y0, long double x1, long double y1,
     long double z0_re, long double z0_im,
     int e,
+    long double radius,
     int width, int height,
     int maxIterations,
     int output[]);
@@ -108,6 +109,7 @@ void usage(const char* progname) {
     printf("  -z, --z0 <real,imaginary> Specify the initial complex value z0 (default: 0,0)\n");
     printf("  -e, --exponent <N>        Set the exponent value for the fractal computation (default: 2)\n");
     printf("  -j, --julia <real,imaginary> Enable Julia set mode with specified complex value (default: disabled)\n");
+    printf("  -r, --radius <FLOAT>      Set the radius for the fractal computation (default: 2.0)\n");
     printf("  -q, --questoes            Execute predefined questions (e.g., questao_1a, questao_2_parte1)\n");
     printf("  -?, --help                Display this help message and exit\n");
     printf("\nExamples:\n");
@@ -210,6 +212,7 @@ int main(int argc, char** argv) {
         long double j_im = 0.0;
         long double z0_re = 0.0;
         long double z0_im = 0.0;
+        long double radius = 2.0;
         bool juliaMode = false;
         unsigned int scale = 1;
         int maxIterations = 750;
@@ -234,6 +237,7 @@ int main(int argc, char** argv) {
         {"maxIterations", required_argument, 0, 'm'},
         {"exponent", required_argument, 0, 'e'},
         {"julia", required_argument, 0, 'j'},
+        {"radius", required_argument, 0, 'r'},
         {"questoes", no_argument, 0, 'q'},
         {"help", no_argument, 0, '?'},
         {0, 0, 0, 0}
@@ -310,6 +314,13 @@ int main(int argc, char** argv) {
                 printf("Julia set enabled with c = (%Lf, %Lf)\n", config.j_re, config.j_im);
                 break;
             }
+            case 'r':
+                config.radius = atof(optarg);
+                if (config.radius <= 0) {
+                    fprintf(stderr, "Radius must be greater than 0\n");
+                    return 1;
+                }
+                break;
             case 'q': 
                 questao_1a();
                 questao_2_parte1(width, height, config.x0, config.x1, config.y0, config.y1);
@@ -354,7 +365,7 @@ int main(int argc, char** argv) {
         // Optimize for symmetric case
         if (config.z0_im == 0) {
             mandelbrotThread(config.numThreads, config.x0, config.y0, config.x1, 0, 
-                             config.z0_re, config.z0_im, config.exponent, width, 
+                             config.z0_re, config.z0_im, config.exponent, config.radius, width, 
                              height / 2, config.maxIterations, output);
             
             // Mirror the upper half to the lower half
@@ -366,7 +377,7 @@ int main(int argc, char** argv) {
             }
         } else {
             mandelbrotThread(config.numThreads, config.x0, config.y0, config.x1, config.y1,
-                             config.z0_re, config.z0_im, config.exponent, width, 
+                             config.z0_re, config.z0_im, config.exponent, config.radius, width, 
                              height, config.maxIterations, output);
         }
     } else {
@@ -418,11 +429,11 @@ int main(int argc, char** argv) {
     // Save image
     char filename[2048];
     if (config.juliaMode) {
-        snprintf(filename, sizeof(filename), "%s/julia-%d-iterations-c(%Lf,%Lf).png", 
-                 exponentDir, config.maxIterations, config.j_re, config.j_im);
+        snprintf(filename, sizeof(filename), "%s/julia-%d-iterations-c(%Lf,%Lf)-radius(%Lf).png", 
+                 exponentDir, config.maxIterations, config.j_re, config.j_im, config.radius);
     } else {
-        snprintf(filename, sizeof(filename), "%s/mandelbrot-%d-iterations-z0(%Lf,%Lf).png", 
-                 exponentDir, config.maxIterations, config.z0_re, config.z0_im);
+        snprintf(filename, sizeof(filename), "%s/mandelbrot-%d-iterations-z0(%Lf,%Lf)-radius(%Lf).png", 
+                 exponentDir, config.maxIterations, config.z0_re, config.z0_im, config.radius);
     }
     
     writePNGImage(output, width, height, filename, config.maxIterations);

@@ -42,16 +42,18 @@
 
 #include <cmath>
 
-static inline int mandel(long double c_re, long double c_im, int count, long double z0_re = 0.0L, long double z0_im = 0.0L, int e = 7)
+static inline int mandel(long double c_re, long double c_im, int count, long double z0_re = 0.0L, long double z0_im = 0.0L, int e = 7, long double radius = 2.0L)
 {
     long double z_re = z0_re;
     long double z_im = z0_im;
     int i;
 
+    radius = radius * radius;
+
     for (i = 0; i < count; ++i) {
         long double r2 = z_re * z_re + z_im * z_im;
 
-        if (r2 > 4.0L)
+        if (r2 > radius)
             break;
 
         if (e == 2) {
@@ -90,6 +92,7 @@ void mandelbrotSerial(
   long double x0, long double y0, long double x1, long double y1,
   long double z0_re, long double z0_im,
   int e,
+  long double radius,
   int width, int height,
   int startRow, int totalRows,
   int maxIterations,
@@ -106,7 +109,7 @@ void mandelbrotSerial(
       long double y = y0 + j * dy;
 
       int index = j * width + i;
-      output[index] = mandel(x, y, maxIterations, z0_re, z0_im, e);
+      output[index] = mandel(x, y, maxIterations, z0_re, z0_im, e, radius);
     }
   }
 }

@@ -10,6 +10,7 @@ typedef struct {
     long double y0, y1;
     long double z0_re, z0_im;
     int e;
+    long double radius;
     unsigned int width;
     unsigned int height;
     int maxIterations;
@@ -24,6 +25,7 @@ extern void mandelbrotSerial(
     long double x0, long double y0, long double x1, long double y1,
     long double z0_re, long double z0_im,
     int e,
+    long double radius,
     int width, int height,
     int startRow, int numRows,
     int maxIterations,
@@ -35,6 +37,7 @@ void workerThreadStart(WorkerArgs * const args) {
         args->x1, args->y1,
         args->z0_re, args->z0_im, // Use z0_re and z0_im from args
         args->e,
+        args->radius,
         args->width, args->height,
         args->startRow, 
         args->numRows,
@@ -48,6 +51,7 @@ void mandelbrotThread(
     long double x0, long double y0, long double x1, long double y1,
     long double z0_re, long double z0_im,
     int e,
+    long double radius,
     int width, int height,
     int maxIterations, int output[])
 {
@@ -76,6 +80,7 @@ void mandelbrotThread(
         args[i].z0_re = z0_re;
         args[i].z0_im = z0_im;
         args[i].e = e;
+        args[i].radius = radius;
         args[i].width = width;
         args[i].height = height;
         args[i].numRows = tmp_height;
