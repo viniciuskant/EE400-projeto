@@ -8,7 +8,17 @@
   \item[(a)] Ao alterar o raio de convergência e o número de iterações no código, o que acontece com a velocidade de processamento, o detalhamento e a precisão da imagem? Para isso, teste valores no código e analise a diferença
   no resultado.
 
-\textbf{\color{red} Falta a parte do raio de convergência}
+      As cores das imagens geradas representam a taxa de divergência dos números complexos no plano. Cada cor indica o número de iterações necessárias para que o valor escape para o infinito, ou seja, para que o módulo do número complexo ultrapasse o raio de convergência definido. Abaixo está a interpretação das cores:
+
+    \begin{itemize}
+        \item \textbf{Azul}: Representa os pontos que divergem rapidamente, escapando para o infinito em poucas iterações.
+        \item \textbf{Verde}: Indica pontos que levam um número moderado de iterações para divergir.
+        \item \textbf{Amarelo e Laranja}: Representam pontos que estão próximos à fronteira do conjunto de Mandelbrot, levando mais iterações para divergir.
+        \item \textbf{Vermelho}: Indica pontos que estão ainda mais próximos da fronteira, divergindo muito lentamente.
+        \item \textbf{Rosa}: Representa os pontos que não divergem, ou seja, pertencem ao conjunto de Mandelbrot.
+    \end{itemize}
+
+    Essa paleta de cores ajuda a visualizar a complexidade e os detalhes do conjunto de Mandelbrot, destacando as regiões de transição entre os pontos que pertencem ao conjunto e os que não pertencem.
 
 \begin{figure}[H]
     \centering
@@ -44,20 +54,86 @@
     \caption{Conjuntos de Mandelbrot para diferentes números de iterações. Cada subfigura apresenta o conjunto gerado para o respectivo número de iterações.}
 \end{figure} 
 
-    As cores das imagens geradas representam a taxa de divergência dos números complexos no plano. Cada cor indica o número de iterações necessárias para que o valor escape para o infinito, ou seja, para que o módulo do número complexo ultrapasse o raio de convergência definido. Abaixo está a interpretação das cores:
-
-    \begin{itemize}
-        \item \textbf{Azul}: Representa os pontos que divergem rapidamente, escapando para o infinito em poucas iterações.
-        \item \textbf{Verde}: Indica pontos que levam um número moderado de iterações para divergir.
-        \item \textbf{Amarelo e Laranja}: Representam pontos que estão próximos à fronteira do conjunto de Mandelbrot, levando mais iterações para divergir.
-        \item \textbf{Vermelho}: Indica pontos que estão ainda mais próximos da fronteira, divergindo muito lentamente.
-        \item \textbf{Rosa}: Representa os pontos que não divergem, ou seja, pertencem ao conjunto de Mandelbrot.
-    \end{itemize}
-
-    Essa paleta de cores ajuda a visualizar a complexidade e os detalhes do conjunto de Mandelbrot, destacando as regiões de transição entre os pontos que pertencem ao conjunto e os que não pertencem.
-
     Ao alterar o número de iterações, conseguimos identificar com maior precisão os números complexos que divergem. Um número maior de iterações permite capturar mais detalhes do conjunto de Mandelbrot, evidenciando regiões de transição entre os pontos que pertencem ao conjunto e os que não pertencem. No entanto, isso também aumenta o tempo de processamento, pois mais cálculos são necessários para determinar a convergência ou divergência de cada ponto.
 
+\begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|}
+                \hline
+                Iterações & Tempo de execução (s) \\ \hline
+                10 & 0.519 \\ \hline
+                29 & 0.622 \\ \hline
+                35 & 0.650 \\ \hline
+                50 & 0.732 \\ \hline
+                70 & 0.725 \\ \hline
+                125 & 0.697 \\ \hline
+                250 & 0.840 \\ \hline
+                500 & 1.288 \\ \hline
+                2000 & 1.954 \\ \hline
+        \end{tabular}
+        \caption{Tempos de execução para diferentes números de iterações.}
+\end{table}
+
+\begin{figure}[H]
+        \centering
+        \subfloat[Raio = 0.1]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(0.100000).png}
+        }
+        \subfloat[Raio = 0.2]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(0.200000).png}
+        }
+        \subfloat[Raio = 0.4]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(0.400000).png}
+        }
+        \\
+        \subfloat[Raio = 0.75]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(0.750000).png}
+        }
+        \subfloat[Raio = 1.0]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(1.000000).png}
+        }
+        \subfloat[Raio = 1.25]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(1.250000).png}
+        }
+        \\
+        \subfloat[Raio = 1.55]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(1.550000).png}
+        }
+        \subfloat[Raio = 2.0]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(2.000000).png}
+        }
+        \subfloat[Raio = 4.0]{
+                \includegraphics[width=0.3\textwidth]{figures/mandelbrot/raio/mandelbrot-250-iterations-z0(0.000000,0.000000)-radius(4.000000).png}
+        }
+        \caption{Conjuntos de Mandelbrot para diferentes valores de raio de convergência. Cada subfigura apresenta o conjunto gerado para o respectivo valor de raio.}
+\end{figure}
+
+
+Alterar o raio de convergência afeta diretamente a área ou o alcance dentro do qual o sistema opera. Ao aumentar o raio de convergência, a área de cobertura se expande, incluindo mais elementos ou regiões no cálculo. Isso pode resultar em maior detalhamento e precisão na imagem gerada, pois mais pontos são considerados. No entanto, essa expansão também aumenta o tempo de processamento, já que mais cálculos são necessários para determinar a convergência ou divergência dos pontos.
+
+Por outro lado, ao diminuir o raio de convergência, a área de cobertura é reduzida, excluindo elementos ou regiões que antes eram considerados. Isso pode acelerar o tempo de processamento, pois menos cálculos são realizados, mas pode comprometer o detalhamento e a precisão da imagem, especialmente nas regiões próximas à fronteira do conjunto de Mandelbrot.
+
+Assim, a escolha do raio de convergência deve equilibrar o nível de detalhamento desejado e o tempo de processamento disponível, dependendo dos objetivos da análise.
+
+Os tempos de execução para cada um dos respectivos raios de convergência são apresentados abaixo. Esses valores medem apenas o tempo gasto na execução da função de série, ou seja, não incluem o tempo de leitura e escrita dos arquivos:
+
+\begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|}
+                \hline
+                Raio & Tempo de execução (s) \\ \hline
+                0.1 & 0.360 \\ \hline
+                0.2 & 0.504 \\ \hline
+                0.4 & 0.422 \\ \hline
+                0.75 & 0.545 \\ \hline
+                1.0 & 0.618 \\ \hline
+                1.25 & 0.730 \\ \hline
+                1.55 & 0.755 \\ \hline
+                2.0 & 0.851 \\ \hline
+                4.0 & 0.833 \\ \hline
+        \end{tabular}
+        \caption{Tempos de execução para diferentes valores de raio de convergência.}
+\end{table}
 
   \item[(b)] A Outros fractais podem ser gerados a partir do Mandelbrot, uma família de exemplos é obtida ao alterar a condição inicial $z_0 = 0$ para outros valores. Gere alguns exemplos desses conjuntos.
 
