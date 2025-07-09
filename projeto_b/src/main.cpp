@@ -14,6 +14,9 @@
 #include <chrono>
 #include <omp.h>
 #include "lodepng.h"
+#include <complex>
+#include <vector>
+#include <fstream>
 
 void writePNGImage(int* buffer, unsigned int width, unsigned int height, const char* filename, int maxIterations) {
     std::vector<unsigned char> image(width * height * 4);
@@ -104,7 +107,8 @@ void usage(const char* progname) {
     printf("  -m, --max-iterations <N>  Set the maximum number of iterations for the fractal computation (default: 750)\n");
     printf("  -z, --z0 <real,imaginary> Specify the initial complex value z0 (default: 0,0)\n");
     printf("  -e, --exponent <N>        Set the exponent value for the fractal computation (default: 2)\n");
-    printf("  -j, --julia               Enable Julia set mode (requires --z0 <real,imaginary> for fixed Julia value)\n");
+    printf("  -j, --julia <real,imaginary> Enable Julia set mode with specified complex value (default: disabled)\n");
+    printf("  -q, --questoes            Execute predefined questions (e.g., questao_1a, questao_2_parte1)\n");
     printf("  -?, --help                Display this help message and exit\n");
     printf("\nExamples:\n");
     printf("  %s -t 4 -v 2 -m 1000 -z 0.355,0.355 -e 3\n", progname);
@@ -134,6 +138,59 @@ void questao_1a() {
     float c3_re = 0.35f * cos(M_PI / 4);
     float c3_im = 0.35f * sin(M_PI / 4);
     printOrbit(c3_re, c3_im, 10); // c3 = 0.35 * e^(iπ/4)
+}
+
+
+void questao_2_parte1(int width, int height, long double x_min, long double x_max, long double y_min, long double y_max) {
+    std::vector<int> buffer(width * height, 0);
+
+    #pragma omp parallel for collapse(2)
+    for (int py = 0; py < height; ++py) {
+        for (int px = 0; px < width; ++px) {
+            long double x = x_min + (x_max - x_min) * px / (width - 1);
+            long double y = y_min + (y_max - y_min) * py / (height - 1);
+
+            std::complex<long double> c(x, y);
+            std::complex<long double> sqrt_disc = std::sqrt(1.0L - 4.0L * c);
+            std::complex<long double> root1 = (1.0L + sqrt_disc) / 2.0L;
+            std::complex<long double> root2 = (1.0L - sqrt_disc) / 2.0L;
+
+            if (std::abs(root1) < 0.5L || std::abs(root2) < 0.5L) {
+                buffer[py * width + px] = 50;
+            }
+        }
+    }
+
+    writePNGImage(buffer.data(), width, height, "data/questao_2_parte1.png", 1);
+    printf("Region plot saved to data/questao_2_parte1.png\n");
+}
+
+void questao_2_parte2(int width, int height, long double x_min, long double x_max, long double y_min, long double y_max) {
+    std::vector<int> buffer(width * height, 0);
+    float tolerancia = 0.1;
+    
+
+    #pragma omp parallel for collapse(2)
+    for (int py = 0; py < height; ++py) {
+        for (int px = 0; px < width; ++px) {
+            long double x = x_min + (x_max - x_min) * px / (width - 1);
+            long double y = y_min + (y_max - y_min) * py / (height - 1);
+
+            std::complex<long double> c(x, y);
+            std::complex<long double> z(0.0L, 0.0L);
+            std::complex<long double> equation = 4.0L * z * (z * z + c);
+
+            if (std::abs(equation) < 1.0L) { // satisfez a primeira parte
+                equation = (z * z + c) * (z * z + c) + c -z;
+                if (std::abs(equation) < tolerancia){
+                    buffer[py * width + px] = 50;
+                }
+            }
+        }
+    }
+
+    writePNGImage(buffer.data(), width, height, "data/questao_2_parte2.png", 1);
+    printf("Region plot saved to data/questao_2_parte2.png\n");
 }
 
 int main(int argc, char** argv) {
@@ -171,6 +228,7 @@ int main(int argc, char** argv) {
         {"maxIterations", required_argument, 0, 'm'},
         {"exponent", required_argument, 0, 'e'},
         {"julia", required_argument, 0, 'j'},
+        {"questoes", no_argument, 0, 'q'},
         {"help", no_argument, 0, '?'},
         {0, 0, 0, 0}
     };
@@ -246,7 +304,11 @@ int main(int argc, char** argv) {
                 printf("Julia set enabled with c = (%Lf, %Lf)\n", config.j_re, config.j_im);
                 break;
             }
-                
+            case 'q': 
+                questao_1a();
+                questao_2_parte1(width, height, config.x0, config.x1, config.y0, config.y1);
+                questao_2_parte2(width, height, config.x0, config.x1, config.y0, config.y1);
+                break;
             case 'z':
                 if (sscanf(optarg, "%Lf,%Lf", &config.z0_re, &config.z0_im) != 2) {
                     fprintf(stderr, "Invalid format for z0. Use --z0 <real,imaginary>\n");
@@ -271,6 +333,8 @@ int main(int argc, char** argv) {
            config.x0, config.x1, config.y0, config.y1);
     printf("  Initial z0: (%Lf, %Lf)\n", config.z0_re, config.z0_im);
     printf("  Exponent: %d\n", config.exponent);
+
+    questao_2_parte1(width, height, config.x0, config.x1, config.y0, config.y1);
 
     // Start timing
     auto mainStart = std::chrono::high_resolution_clock::now();
@@ -320,13 +384,9 @@ int main(int argc, char** argv) {
     }
 
     // Determine output directory
-    const char* baseDir = nullptr;
-    if (access("data", F_OK) == 0) {
-        baseDir = "data";
-    } else if (access("../data", F_OK) == 0) {
-        baseDir = "../data";
-    } else {
-        fprintf(stderr, "Error: Could not find output directory\n");
+    const char* baseDir = "data";
+    if (access(baseDir, F_OK) != 0 && mkdir(baseDir, 0755) != 0) {
+        fprintf(stderr, "Error: Could not create base directory %s\n", baseDir);
         delete[] output;
         return 1;
     }
