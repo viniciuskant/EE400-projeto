@@ -21,6 +21,7 @@ static struct option long_options[] = {
     {"maxIterations", required_argument, 0, 'm'},
     {"exponent", required_argument, 0, 'e'},
     {"julia", required_argument, 0, 'j'},
+    {"questoes", no_argument, 0, 'q'},
     {"help", no_argument, 0, '?'},
     {0, 0, 0, 0}
 };
@@ -123,7 +124,7 @@ static inline int mandel(long double c_re, long double c_im, int count, long dou
 
 Durante o desenvolvimento, foram realizadas tentativas de otimização para encontrar os pontos fixos, porém devido ao float, não consegui encontrar um intervalo de erro que conseguia parar a execução antes e encontrei imagens distorcidas.
 
-Abaixo, apresentamos um exemplo de imagem gerada com a tentativa de otimização tentando encontrar pontos fixos, basta comparar com \autoref{fig:comparison_iterations} para ver as distorções introduzidas por isso:
+Abaixo, apresentamos um exemplo de imagem gerada com a tentativa de otimização tentando encontrar pontos fixos, basta comparar com \autoref{fig:mandelbrot} para ver as distorções introduzidas por isso:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{figures/comparacao/mandelbrot_float.png}

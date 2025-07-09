@@ -156,7 +156,7 @@ void questao_2_parte1(int width, int height, long double x_min, long double x_ma
             std::complex<long double> root2 = (1.0L - sqrt_disc) / 2.0L;
 
             if (std::abs(root1) < 0.5L || std::abs(root2) < 0.5L) {
-                buffer[py * width + px] = 50;
+                buffer[py * width + px] = 128;
             }
         }
     }
@@ -167,8 +167,8 @@ void questao_2_parte1(int width, int height, long double x_min, long double x_ma
 
 void questao_2_parte2(int width, int height, long double x_min, long double x_max, long double y_min, long double y_max) {
     std::vector<int> buffer(width * height, 0);
-    float tolerancia = 0.1;
-    
+    float tolerancia = 0.01;
+    long double step = 0.2L;
 
     #pragma omp parallel for collapse(2)
     for (int py = 0; py < height; ++py) {
@@ -177,13 +177,19 @@ void questao_2_parte2(int width, int height, long double x_min, long double x_ma
             long double y = y_min + (y_max - y_min) * py / (height - 1);
 
             std::complex<long double> c(x, y);
-            std::complex<long double> z(0.0L, 0.0L);
-            std::complex<long double> equation = 4.0L * z * (z * z + c);
 
-            if (std::abs(equation) < 1.0L) { // satisfez a primeira parte
-                equation = (z * z + c) * (z * z + c) + c -z;
-                if (std::abs(equation) < tolerancia){
-                    buffer[py * width + px] = 50;
+            for (long double z_re = -2.0L; z_re < 2.0L; z_re += step) {
+                for (long double z_im = -2.0L; z_im < 2.0L; z_im += step) {
+                    std::complex<long double> z(z_re, z_im);
+                    std::complex<long double> equation = 4.0L * z * (z * z + c);
+
+                    if (std::abs(equation) < 1.0L) { // satisfez a primeira parte
+                        equation = (z * z + c) * (z * z + c) + c - z;
+                        if (std::abs(equation) < tolerancia) {
+                            buffer[py * width + px] = 128;
+                            break; // Seta e sai do loop interno
+                        }\
+                    }
                 }
             }
         }

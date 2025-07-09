@@ -1,4 +1,4 @@
-\subsection*{Exercício 2: Estudando \( f_c \) e sua dinâmica}
+\subsection{Exercício 2: Estudando \( f_c \) e sua dinâmica}
 
 Pontos periódicos de uma função são aqueles cujos valores se repetem após um número finito de iterações, assim, existe um \( n \) (chamado de período) tal que \( f_c^n (\hat{z}) = \hat{z} \). Se \( n = 1 \), \( \hat{z} \) é chamado de ponto fixo. Observe que, para cada \( c \), os pontos periódicos de \( f_c \) serão diferentes dos pontos de sua órbita. Porém, se a órbita é convergente, existirá um subconjunto dela que converge a cada \( \hat{z} \). Nesse caso, ele é chamado de atrator e a seguinte desigualdade é válida: \( |(f_c^n)' (\hat{z})| < 1 \).
 
@@ -25,21 +25,127 @@ Pontos periódicos de uma função são aqueles cujos valores se repetem após u
     \item \textbf{Ache a região de \( M \) que contém os pontos \( c \) de forma que \( f_c \) possua um ponto fixo. Faça o mesmo para os \( c \) que fazem \( f_c \) ter um ponto de período igual a 2. Identifique essas duas regiões em um mesmo gráfico}. \\
     
         \[
-        \begin{array}{|c|c|c|c|}
+        \begin{array}{|c|c|c|}
         \hline
-        n & z_n & z_n^2 & f_c(z_n) = z_n^2 + c \\
+        \textbf{Iteração} & \textbf{Expressão} & \textbf{Função} \\
         \hline
-        n & z_n & {z_n}^2 & ({z_n})^2 + c \\
-        n + 1 & {z_n}^2 + c & {({z_n}^2 + c)}^2 & {z_n}^2  + 2 z_n c + c^2 + c \\
-        n + 2 & 2 z_n c + c^2 + c & ({z_n}^2+ 2 z_n c + c^2 + c)^2 & (z_n + c)^4 + 2(z_n + c)^2 c + c^2 + c\\      \hline
+        1 & z_n & f_c^{(1)}(z_n) = z_n^2 + c \\
+        2 & z_{n+1} = z_n^2 + c & f_c^{(2)}(z_n) = (z_n^2 + c)^2 + c \\
+        \hline
         \end{array}
         \]
 
-        Agora igualando para os valores de n e n + 2, obtemos os pontos de período 2 (\( n = 2 \)):
-           \textbf{\color{red}Falta resolver}
+
+        \begin{itemize}
+            \item Para ponto fixo:
+                Agora igualando para os valores de \(z_n\) e \(f^{1}_c\), obtemos os pontos fixos:
+            
+                        
+                    \begin{equation}
+                        z_n =  z_n^2 + c
+                    \label{eq:questao_2_item_b_1}
+                    \end{equation}
+           
+                Resolvendo a equação quadrática:
+
+                \[
+                z^2 + c = z \implies z^2 - z + c = 0
+                \]
+
+                As raízes da equação são dadas por:
+
+                \[
+                z = \frac{1 \pm \sqrt{1 - 4c}}{2}
+                \]
+
+                Para que o ponto fixo seja atrator, a condição \( |f_c'(z)| < 1 \) deve ser satisfeita. Como \( f_c'(z) = 2z \), temos:
+
+                \[
+                |2z| < 1 \implies |z| < \frac{1}{2}.
+                \]
+
+                Substituindo \( z = \frac{1 \pm \sqrt{1 - 4c}}{2} \):
+
+                \[
+                \left| \frac{1 \pm \sqrt{1 - 4c}}{2} \right| < \frac{1}{2} \implies |1 \pm \sqrt{1 - 4c}| < 1.
+                \]
+
+                Portanto, a região de \( c \) que satisfaz essa condição pode ser determinada resolvendo a desigualdade acima. Para identificar essa região, foi implementado um código que gera o gráfico correspondente. Para executar o código, utilize o seguinte comando:
+
+                \[
+                \texttt{bin/mandelbrot --questoes}
+                \]
+
+                \begin{figure}[H]
+                    \centering
+                    \subfloat[Regiões de \( M \) contendo os pontos \( c \) para os quais \( f_c \) possui um ponto fixo.]
+                    {
+                        \includegraphics[width=0.3\textwidth]{figures/questao_2_parte1.png}
+                        \label{fig:mandelbrot_regions_fixed_points}
+                    }
+                    \hfill
+                    \subfloat[Regiões de \( M \) clássica.]
+                    {
+                        \includegraphics[width=0.3\textwidth]{figures/questao2_mandelbrot.png}
+                        \label{fig:mandelbrot_regions_period_2}
+                    }
+                    \hfill
+                    \subfloat[Sobreposição das regiões de \( M \) contendo os pontos \( c \) para os quais \( f_c \) possui um ponto fixo.]
+                    {
+                        \includegraphics[width=0.3\textwidth]{figures/soobreposicao_questao_2_parte1.png}
+                        \label{fig:mandelbrot_regions_combined_overlay}
+                    }
+                \end{figure}
 
 
-        \textbf{\color{red} Quais regições são essas?}
+
+
+            \item  Para período igual a 2:
+                Agora igualando para os valores de \(z_n\) e \(f^{2}_c\), obtemos os pontos de período 2 (\( n = 2 \)):
+                                
+                \begin{equation}
+                    (z^2 + c)^2 + c - z = 0
+                    \label{eq:parte2}                    
+                \end{equation}
+
+                Para cada solução \( z \), verificamos se \( f_c(z) \neq z \) (ou seja, não é ponto fixo) e se é atrator, satisfazendo a condição \( |4z(z^2 + c)| < 1 \).
+
+                A condição para atrator de período 2 é:
+
+                \begin{equation}
+                    |4z(z^2 + c)| < 1
+                    \label{eq:atrator}                    
+                \end{equation}
+
+                Para encontrar a região dos \( c \) em que \( f_c \) tem um ponto de período 2 atrator, resolvemos numericamente a equação acima. O método consiste em discretizar o plano complexo em uma grade de pontos e, para cada ponto \( c \), verificar se existe algum \( z \) que satisfaz \autoref{eq:atrator}. Para isso, iteramos sobre valores iniciais de \( z \) e calculamos a função \( f_c \) até encontrar uma solução que satisfaz as condições de atrator. Para esse pontos verificamos se satisfaz a \autoref{eq:parte2} com uma tolerância de 0.01. Após o cálculo, o resultado é salvo como uma imagem que mostra as regiões de \( M \) contendo os pontos \( c \) para os quais \( f_c \) possui um ponto de período igual a 2.
+
+                A figura abaixo mostra as regiões de \( M \) contendo os pontos \( c \) para os quais \( f_c \) possui um ponto fixo e um ponto de período igual a 2.
+
+                
+                \begin{figure}[H]
+                    \centering
+                    \subfloat[Regiões de \( M \) contendo os pontos \( c \) para os quais \( f_c \) possui um ponto de período igual a 2.]
+                    {
+                        \includegraphics[width=0.3\textwidth]{figures/questao_2_parte2.png}
+                        \label{fig:mandelbrot_regions_period_2}
+                    }
+                    \hfill
+                    \subfloat[Regiões de \( M \) clássica.]
+                    {
+                        \includegraphics[width=0.3\textwidth]{figures/questao2_mandelbrot.png}
+                        \label{fig:mandelbrot_regions_classic}
+                    }
+                    \hfill
+                    \subfloat[Sobreposição das regiões de \( M \) contendo os pontos \( c \) para os quais \( f_c \) possui um ponto fixo e um ponto de período igual a 2.]
+                    {
+                        \includegraphics[width=0.3\textwidth]{figures/soobreposicao_questao_2_parte2.png}
+                        \label{fig:mandelbrot_regions_combined_overlay}
+                    }
+                \end{figure}
+
+        \end{itemize}
+
+
 
 
     \item \textbf{Prove que um ponto \( c \) pertence a \( M \) se \( |z_n| \leq 2 \), para todo \( n = 1, 2, \ldots \). }\\
